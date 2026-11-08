@@ -37,7 +37,8 @@ Spending, Statements, Settings. The account email and the Ferret logo sit in the
 3. Connect Gmail: Google consent (read-only mail scope), then back to S03 with Gmail shown as connected and the
    first search running.
 4. Upload: S03 drop zone. Ferret detects the bank. A locked PDF with no saved password opens S04.
-5. S04: the user enters the password once. It is saved for that card. Parsing continues (S03 states/processing.html).
+5. S04: the user enters the password once (Esc just closes the dialog; "Skip this statement" deletes the file;
+   an unanswered locked statement is deleted after 7 days). It is saved for that card. Parsing continues (S03 states/processing.html).
 6. Statement reconciles: row shows "Reconciled", S02 fills in.
 
 **Monthly, hands-off (Gmail)**

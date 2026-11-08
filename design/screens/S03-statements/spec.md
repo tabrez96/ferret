@@ -13,8 +13,10 @@ size: 1280x800
 - History table, newest first: statement month, card, source and date, status chip, amount spent, action.
   - Reconciled (ok): numbers saved and shown on S02.
   - Needs password (warn): "Enter password" opens S04. Happens for a new card or when a saved password stops working.
-    The file is kept only until the password is entered or the user picks "Not now"; in that case it is deleted and
-    the row says "Skipped: upload or re-fetch from Gmail to try again".
+    The file waits, encrypted, for at most 7 days from when it arrived. Under the chip the row says
+    "Waiting until <date>" (e.g. "Waiting until 7 Nov"). If the password is entered, parsing continues. If the user
+    picks "Skip this statement" on S04, or 7 days pass, the file is deleted and the row says
+    "Skipped: upload or re-fetch from Gmail to try again". Closing S04 with Esc leaves the row as it is.
   - Didn't add up (danger): row expands to show opening balance, transactions read, closing balance and the
     difference, the message that nothing was saved and the file is deleted, "Upload again" and "Report problem"
     (sends bank, month and totals only).
@@ -36,9 +38,12 @@ size: 1280x800
 ## Notes and open questions
 - "Didn't add up" is the plain-language name for a failed reconciliation check, used everywhere.
 - Report problem never sends the file or any transaction text.
+- A locked statement never waits longer than 7 days, so no statement file stays on the server indefinitely. The
+  deadline is shown on the row so the deletion is never a surprise.
 
 ## Change log
 - First version.
 - Added the dark theme (follows the system setting) and moved all colours to theme tokens; replaced the older ferret drawing in the page with the approved mark. Asked for in design review.
 - Sidebar and header mark replaced with the redrawn logo (ferret leaping as a check mark), after the original logo was sent back for something stronger.
 - Logo redrawn as a flat ferret silhouette without face details, for a more modern look; sidebar and header mark updated in every state (requested in design review).
+- Locked statements now wait at most 7 days, with "Waiting until <date>" under the Needs password chip; the skip action is renamed "Skip this statement" (raised in architecture review).
