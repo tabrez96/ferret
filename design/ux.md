@@ -122,17 +122,17 @@ Plain, calm, a little warm. Say what happened and what to do next. No blame ("Th
 not "Invalid password"). No finance jargon beyond what is printed on a statement.
 
 ### Logo
-The mark is a ferret peeking over the top of a statement, paws on the page, its bandit mask in ink: Ferret goes
-through your statements and ferrets out what you spent. Only the head and the page are drawn, so it stays readable
-at 16px (orange head, dark mask, white page). The head is long and tapers to a pointed snout, with small low ears and
-a pale muzzle, so it reads as a ferret and not a raccoon or a bear; keep those features if the mark is redrawn. The white page with an ink outline keeps it visible on light and dark
-backgrounds.
+The mark is a ferret mid-leap whose long body is a check mark: the short stroke is its hindquarters and tail, the
+long stroke its body, and its head (pointed snout, small low ear, ink bandit mask, pale muzzle) leads the way up.
+It says both halves of the product: Ferret goes through your statements, and every one is checked so the numbers
+add up. At 16px it reads as an amber tick with a dark-masked head; larger, the ear, eye and paws appear. The body is
+amber, which reads on both the light and the dark `paper`, and the mask and nose sit on amber, so the mark is the
+same in both themes. Keep the check shape, the mask and the pointed snout if it is redrawn.
 - `brand/mark.svg`: app icon, favicon, sidebar on narrow screens. Minimum 16px.
 - `brand/logo.svg`: mark plus the lowercase wordmark "ferret" in ink. On dark backgrounds the wordmark switches
   to `paper` (`#FAF7F2`); the mark stays as is. In the app the wordmark is HTML text in the `ink` token, so it
-  follows the theme on its own. The mark is the same in both themes: its white page with the ink outline is what
-  keeps it readable on the dark sidebar.
-- Clear space around the logo: at least half the mark's height. Don't recolour the ferret or put it on amber.
+  follows the theme on its own. The mark is the same in both themes.
+- Clear space around the logo: at least half the mark's height. Don't recolour the ferret, rotate it, or put it on amber.
 
 ## Accessibility
 - WCAG 2.2 AA contrast in both themes. Amber is never used for text or as the only signal.
