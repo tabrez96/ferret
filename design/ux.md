@@ -122,12 +122,13 @@ Plain, calm, a little warm. Say what happened and what to do next. No blame ("Th
 not "Invalid password"). No finance jargon beyond what is printed on a statement.
 
 ### Logo
-The mark is a ferret mid-leap whose long body is a check mark: the short stroke is its hindquarters and tail, the
-long stroke its body, and its head (pointed snout, small low ear, ink bandit mask, pale muzzle) leads the way up.
-It says both halves of the product: Ferret goes through your statements, and every one is checked so the numbers
-add up. At 16px it reads as an amber tick with a dark-masked head; larger, the ear, eye and paws appear. The body is
-amber, which reads on both the light and the dark `paper`, and the mask and nose sit on amber, so the mark is the
-same in both themes. Keep the check shape, the mask and the pointed snout if it is redrawn.
+The mark is a flat, single-colour ferret silhouette drawn as one bold stroke: its sleek body is a check mark, and
+a pointed head with one small ear leads the way up and forward. There is no face (no eye, mask or muzzle), so it
+stays clean and modern at every size. It says both halves of the product: Ferret goes through your statements, and
+every one is checked so the numbers add up. At 16px it reads as an amber tick with a pointed tip; larger, the head
+and ear read as a ferret. It is amber only, which reads on both the light and the dark `paper`, so the mark is the
+same in both themes. Keep the check shape, the pointed head and the ear if it is redrawn; don't add facial details.
+The wordmark is lowercase "ferret", semibold with tight letter-spacing.
 - `brand/mark.svg`: app icon, favicon, sidebar on narrow screens. Minimum 16px.
 - `brand/logo.svg`: mark plus the lowercase wordmark "ferret" in ink. On dark backgrounds the wordmark switches
   to `paper` (`#FAF7F2`); the mark stays as is. In the app the wordmark is HTML text in the `ink` token, so it
