@@ -10,6 +10,6 @@ Status: **draft** (UX not approved yet), **approved**, **building** (a ticket fo
 | --- | --- | --- | --- | --- | --- |
 | S01 | [Sign in](screens/S01-sign-in/screen.html) (+3 states) · [spec](screens/S01-sign-in/spec.md) | building | Sign in or create an account without a Ferret password | T-59, T-60, T-68 | 2026-11-08 |
 | S02 | [Spending](screens/S02-spending/screen.html) (+2 states) · [spec](screens/S02-spending/spec.md) | building | See what you spent this month, per card, at which merchants, and every transaction | T-66, T-67 | 2026-11-08 |
-| S03 | [Statements](screens/S03-statements/screen.html) (+4 states) · [spec](screens/S03-statements/spec.md) | building | Bring statements in (Gmail or PDF) and see whether each one added up | T-64, T-65, T-66, T-67 | 2026-11-08 |
+| S03 | [Statements](screens/S03-statements/screen.html) (+4 states) · [spec](screens/S03-statements/spec.md) | building | Bring statements in (Gmail or PDF) and see whether each one added up | T-64, T-65, T-66, T-67, T-71 | 2026-11-08 |
 | S04 | [Statement password](screens/S04-statement-password/screen.html) (+2 states) · [spec](screens/S04-statement-password/spec.md) | building | Enter a statement PDF's password once so this card's statements open by themselves from then on | T-65 | 2026-11-08 |
 | S05 | [Settings](screens/S05-settings/screen.html) (+2 states) · [spec](screens/S05-settings/spec.md) | building | Control Gmail, saved statement passwords, chatbot access and the account | T-68 | 2026-11-08 |
