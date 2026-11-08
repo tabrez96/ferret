@@ -1,0 +1,13 @@
+.git
+.github
+.venv
+.dmi
+design
+tests
+data
+private
+**/__pycache__
+.pytest_cache
+.ruff_cache
+.coverage
+htmlcov
