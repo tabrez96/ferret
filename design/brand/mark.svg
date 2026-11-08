@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Ferret">
+  <title>Ferret</title>
+  <!-- Small, low ears -->
+  <circle cx="17" cy="14" r="4.5" fill="#C9772F"/>
+  <circle cx="47" cy="14" r="4.5" fill="#C9772F"/>
+  <circle cx="17" cy="14" r="2" fill="#F4DDBF"/>
+  <circle cx="47" cy="14" r="2" fill="#F4DDBF"/>
+  <!-- Long head tapering to a pointed snout, peeking over the statement -->
+  <path d="M32 8 C43 8 50 13 50 20 C50 28 40 36 32 39 C24 36 14 28 14 20 C14 13 21 8 32 8 Z" fill="#C9772F"/>
+  <!-- Pale muzzle -->
+  <path d="M22.5 25 C25 32 28.5 37 32 38.5 C35.5 37 39 32 41.5 25 C37 23.5 27 23.5 22.5 25 Z" fill="#F4DDBF"/>
+  <!-- Bandit mask band across the eyes -->
+  <path d="M14.5 18.5 C20.5 15 27 16.5 32 19.5 C37 16.5 43.5 15 49.5 18.5 C48 25 40 25.5 32 23.5 C24 25.5 16 25 14.5 18.5 Z" fill="#1C2430"/>
+  <circle cx="23.5" cy="20" r="2.3" fill="#FFFFFF"/>
+  <circle cx="40.5" cy="20" r="2.3" fill="#FFFFFF"/>
+  <!-- Nose at the tip of the snout -->
+  <ellipse cx="32" cy="33.5" rx="2.6" ry="1.9" fill="#1C2430"/>
+  <!-- Statement page -->
+  <rect x="9.5" y="38.5" width="45" height="22" rx="4" fill="#FFFFFF" stroke="#1C2430" stroke-width="3"/>
+  <rect x="16" y="45" width="20" height="3" rx="1.5" fill="#1C2430"/>
+  <rect x="40" y="45" width="8" height="3" rx="1.5" fill="#C9772F"/>
+  <rect x="16" y="51.5" width="16" height="3" rx="1.5" fill="#1C2430"/>
+  <rect x="40" y="51.5" width="8" height="3" rx="1.5" fill="#C9772F"/>
+  <!-- Paws over the page edge -->
+  <ellipse cx="22" cy="39" rx="4.2" ry="3.2" fill="#C9772F" stroke="#1C2430" stroke-width="1.5"/>
+  <ellipse cx="42" cy="39" rx="4.2" ry="3.2" fill="#C9772F" stroke="#1C2430" stroke-width="1.5"/>
+</svg>
