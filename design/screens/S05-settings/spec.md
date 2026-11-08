@@ -22,9 +22,11 @@ size: 1280x800
   deleted."
 - No token yet: the token row shows "Create token".
 - No cards yet: "Passwords appear here after your first locked statement."
+- Dark theme: `states/dark.html` shows the main state with the dark tokens. The app follows the system setting; every state above has a dark version through the same tokens.
 
 ## Notes and open questions
 - Removing a password means the next locked statement for that card asks again (S04).
 
 ## Change log
 - First version.
+- Added the dark theme (follows the system setting) and moved all colours to theme tokens; replaced the older ferret drawing in the page with the approved mark. Asked for in design review.

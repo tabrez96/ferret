@@ -31,6 +31,7 @@ size: 1280x800
 - Not a statement / unreadable PDF: same notice pattern: "This doesn't look like a credit card statement."
 - Gmail disconnected by Google (token expired): warn strip "Gmail stopped connecting. Reconnect to keep statements
   coming in." with "Reconnect".
+- Dark theme: `states/dark.html` shows the main state with the dark tokens. The app follows the system setting; every state above has a dark version through the same tokens.
 
 ## Notes and open questions
 - "Didn't add up" is the plain-language name for a failed reconciliation check, used everywhere.
@@ -38,3 +39,4 @@ size: 1280x800
 
 ## Change log
 - First version.
+- Added the dark theme (follows the system setting) and moved all colours to theme tokens; replaced the older ferret drawing in the page with the approved mark. Asked for in design review.

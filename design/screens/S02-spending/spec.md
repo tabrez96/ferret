@@ -26,6 +26,7 @@ size: 1280x800
 - Loading: grey skeleton blocks in each card, no spinners.
 - Search with no results: "No transactions match "xyz" in October."
 - Mixed currencies (later, when Indian banks land): one total per currency, never added together.
+- Dark theme: `states/dark.html` shows the main state with the dark tokens. The app follows the system setting; every state above has a dark version through the same tokens.
 
 ## Notes and open questions
 - No categories in the MVP; merchants only.
@@ -33,3 +34,4 @@ size: 1280x800
 
 ## Change log
 - First version.
+- Added the dark theme (follows the system setting) and moved all colours to theme tokens; replaced the older ferret drawing in the page with the approved mark. Asked for in design review.
