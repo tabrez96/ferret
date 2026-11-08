@@ -35,3 +35,4 @@ size: 1280x800
 ## Change log
 - First version.
 - Added the dark theme (follows the system setting) and moved all colours to theme tokens; replaced the older ferret drawing in the page with the approved mark. Asked for in design review.
+- Sidebar and header mark replaced with the redrawn logo (ferret leaping as a check mark), after the original logo was sent back for something stronger.
