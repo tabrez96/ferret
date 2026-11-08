@@ -8,8 +8,8 @@ Status: **draft** (UX not approved yet), **approved**, **building** (a ticket fo
 
 | ID | Screen | Status | Purpose | Tickets | Updated |
 | --- | --- | --- | --- | --- | --- |
-| S01 | [Sign in](screens/S01-sign-in/screen.html) (+2 states) · [spec](screens/S01-sign-in/spec.md) | draft | Sign in or create an account without a Ferret password | none yet | 2026-11-08 |
-| S02 | [Spending](screens/S02-spending/screen.html) (+1 states) · [spec](screens/S02-spending/spec.md) | draft | See what you spent this month, per card, at which merchants, and every transaction | none yet | 2026-11-08 |
-| S03 | [Statements](screens/S03-statements/screen.html) (+3 states) · [spec](screens/S03-statements/spec.md) | draft | Bring statements in (Gmail or PDF) and see whether each one added up | none yet | 2026-11-08 |
-| S04 | [Statement password](screens/S04-statement-password/screen.html) (+1 states) · [spec](screens/S04-statement-password/spec.md) | draft | Enter a statement PDF's password once so this card's statements open by themselves from then on | none yet | 2026-11-08 |
-| S05 | [Settings](screens/S05-settings/screen.html) (+1 states) · [spec](screens/S05-settings/spec.md) | draft | Control Gmail, saved statement passwords, chatbot access and the account | none yet | 2026-11-08 |
+| S01 | [Sign in](screens/S01-sign-in/screen.html) (+3 states) · [spec](screens/S01-sign-in/spec.md) | draft | Sign in or create an account without a Ferret password | none yet | 2026-11-08 |
+| S02 | [Spending](screens/S02-spending/screen.html) (+2 states) · [spec](screens/S02-spending/spec.md) | draft | See what you spent this month, per card, at which merchants, and every transaction | none yet | 2026-11-08 |
+| S03 | [Statements](screens/S03-statements/screen.html) (+4 states) · [spec](screens/S03-statements/spec.md) | draft | Bring statements in (Gmail or PDF) and see whether each one added up | none yet | 2026-11-08 |
+| S04 | [Statement password](screens/S04-statement-password/screen.html) (+2 states) · [spec](screens/S04-statement-password/spec.md) | draft | Enter a statement PDF's password once so this card's statements open by themselves from then on | none yet | 2026-11-08 |
+| S05 | [Settings](screens/S05-settings/screen.html) (+2 states) · [spec](screens/S05-settings/spec.md) | draft | Control Gmail, saved statement passwords, chatbot access and the account | none yet | 2026-11-08 |

@@ -22,9 +22,11 @@ size: 1280x800
   `role="alert"` message. Also used when a saved password stops working (bank changed it); a correct new password
   replaces the saved one.
 - Checking: primary button shows a spinner and "Opening…", field disabled.
+- Dark theme: `states/dark.html` shows the main state with the dark tokens. The app follows the system setting; every state above has a dark version through the same tokens.
 
 ## Notes and open questions
 - No bank-specific password format hints in the MVP; formats change and hints could leak personal-detail patterns.
 
 ## Change log
 - First version.
+- Added the dark theme (follows the system setting) and moved all colours to theme tokens; replaced the older ferret drawing in the page with the approved mark. Asked for in design review.
