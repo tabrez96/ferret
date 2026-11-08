@@ -68,7 +68,20 @@ Python 3.15 is new. If any dependency has no 3.15 wheel yet, the Docker image bu
 
 ## Development
 
-The engineer adds build and test instructions here as the code lands.
+Requires [uv](https://docs.astral.sh/uv/); it installs Python 3.15 itself (see `.python-version`).
+
+```
+uv sync                                        # install dependencies (dev included)
+uv run uvicorn ferret.web.app:app --reload     # run locally; health check at http://127.0.0.1:8000/healthz
+uv run pytest                                  # tests
+uv run pytest --cov=ferret                     # tests with coverage
+uv run ruff check . && uv run ruff format --check .   # lint and format check
+uv run ruff format .                           # fix formatting
+docker compose build                           # build the container image
+docker compose up                              # run it on port 8000
+```
+
+`private/` and `data/` are git-ignored; real statements go in `private/statements/` only.
 
 ---
 
