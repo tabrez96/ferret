@@ -1,12 +1,32 @@
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
-from ferret import __version__
+from ferret import __version__, control
+from ferret.config import Settings
+from ferret.keys import load_master_key
+from ferret.logging import setup_logging
 from ferret.web.templating import STATIC_DIR
 
 
+@asynccontextmanager
+async def lifespan(app: FastAPI) -> AsyncIterator[None]:
+    settings = Settings.from_env()
+    setup_logging()
+    # Raises MasterKeyError when the key is missing or unusable: the app refuses to start.
+    app.state.kek = load_master_key(settings.master_key_file, settings.data_dir)
+    app.state.settings = settings
+    settings.users_dir.mkdir(parents=True, exist_ok=True, mode=0o700)
+    control.connect(settings.control_db_path).close()
+    yield
+
+
 def create_app() -> FastAPI:
-    app = FastAPI(title="Ferret", version=__version__, docs_url=None, redoc_url=None)
+    app = FastAPI(
+        title="Ferret", version=__version__, docs_url=None, redoc_url=None, lifespan=lifespan
+    )
     app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
     @app.get("/healthz")

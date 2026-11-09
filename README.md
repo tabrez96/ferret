@@ -43,7 +43,7 @@ Control Gmail, saved statement passwords, chatbot access and the account
 
 | Layer | Choice | Reason |
 |---|---|---|
-| Language | Python 3.15 | Chosen for the product. Best PDF tooling, and existing open-source parsers for Indian banks are Python. |
+| Language | Python 3.14 | Chosen for the product. Best PDF tooling, and existing open-source parsers for Indian banks are Python. |
 | Packaging | uv, `pyproject.toml`, lockfile committed | Fast, reproducible installs; one command for dev and CI. |
 | Web framework | FastAPI + Uvicorn | Mature, typed, async; also hosts the MCP endpoint in the same process. |
 | Pages | Server-rendered Jinja2 templates + HTMX (vendored, no CDN) | The screens are tables, forms and one dialog; no SPA build chain needed. |
@@ -63,12 +63,12 @@ Control Gmail, saved statement passwords, chatbot access and the account
 | CI | GitHub Actions: lint and tests on every pull request | The code lives on GitHub; no extra service. |
 | Tests and lint | pytest, pytest-cov, ruff, reportlab (fixture generation only) | Boring defaults; reportlab draws the synthetic statements. |
 
-Python 3.15 is new. If any dependency has no 3.15 wheel yet, the Docker image builds it from source (build tools in a builder stage); the project does not pin an older Python.
+Python 3.14 is used until `sqlcipher3-wheels` publishes 3.15 wheels; then the project moves to 3.15.
 <!-- /about -->
 
 ## Development
 
-Requires [uv](https://docs.astral.sh/uv/); it installs Python 3.15 itself (see `.python-version`).
+Requires [uv](https://docs.astral.sh/uv/); it installs Python 3.14 itself (see `.python-version`).
 
 ```
 uv sync                                        # install dependencies (dev included)
@@ -80,6 +80,20 @@ uv run ruff format .                           # fix formatting
 docker compose build                           # build the container image
 docker compose up                              # run it on port 8000
 ```
+
+### Master key
+
+Ferret will not start without a master key. It wraps every user's data key, so keep it outside
+`data/` and back it up separately: losing it makes every user database unreadable.
+
+```
+mkdir -p secrets && openssl rand -hex 32 > secrets/ferret_master_key && chmod 600 secrets/ferret_master_key
+export FERRET_MASTER_KEY_FILE=$PWD/secrets/ferret_master_key   # must be outside FERRET_DATA_DIR (default ./data)
+```
+
+The container runs as uid 1000, so the key file must be readable by uid 1000. `FERRET_DATA_DIR`
+defaults to `./data`. User databases use SQLCipher through the `sqlcipher3-wheels` package, which
+bundles the library (no system package needed).
 
 `private/` and `data/` are git-ignored; real statements go in `private/statements/` only.
 
