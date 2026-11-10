@@ -1,10 +1,19 @@
 import re
 
+import pytest
+
 from ferret.web.templating import templates
 
 
 def render(state="form", **ctx) -> str:
-    context = {"state": state, "email": "", "error": None, "csrf_token": "tok", **ctx}
+    context = {
+        "state": state,
+        "email": "",
+        "error": None,
+        "notice": None,
+        "csrf_token": "tok",
+        **ctx,
+    }
     return templates.env.get_template("signin.html").render(**context)
 
 
@@ -52,3 +61,23 @@ def test_email_is_escaped():
 def test_no_remote_assets():
     for state in ("form", "sent", "expired"):
         assert not re.search(r'(src|href)="https?://', render(state))
+
+
+@pytest.mark.parametrize(
+    ("notice", "copy"),
+    [
+        ("google_failed", "We couldn't sign you in with Google."),
+        ("google_unverified", "Google hasn't confirmed this email address."),
+        ("google_unavailable", "Google sign-in isn't set up here."),
+    ],
+)
+def test_google_notices(notice, copy):
+    html = render(notice=notice)
+    assert copy in html
+    assert 'class="notice notice-danger" role="alert"' in html
+    assert "Continue with Google" in html
+    assert 'action="/signin/email"' in html
+
+
+def test_no_notice_by_default():
+    assert "notice-danger" not in render()

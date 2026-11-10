@@ -112,4 +112,26 @@ def load_dek(conn: sqlite3.Connection, kek: bytes, user_id: str) -> bytes:
 
 
 def get_user_by_email(conn: sqlite3.Connection, email: str) -> sqlite3.Row | None:
-    return conn.execute("SELECT id, email FROM users WHERE email = ?", (email,)).fetchone()
+    return conn.execute(
+        "SELECT id, email, google_sub FROM users WHERE email = ?", (email,)
+    ).fetchone()
+
+
+def get_user_by_google_sub(conn: sqlite3.Connection, sub: str) -> sqlite3.Row | None:
+    return conn.execute(
+        "SELECT id, email, google_sub FROM users WHERE google_sub = ?", (sub,)
+    ).fetchone()
+
+
+def link_google_sub(conn: sqlite3.Connection, user_id: str, sub: str) -> bool:
+    """Link a Google account to a user. False when it is linked to a different Google account."""
+    try:
+        with conn:
+            cur = conn.execute(
+                "UPDATE users SET google_sub = ?"
+                " WHERE id = ? AND (google_sub IS NULL OR google_sub = ?)",
+                (sub, user_id, sub),
+            )
+    except sqlite3.IntegrityError:
+        return False  # another account already holds this Google account
+    return cur.rowcount == 1

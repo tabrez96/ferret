@@ -6,6 +6,7 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
 from ferret import __version__, control
+from ferret.auth.google import GoogleOAuth, google_from_settings
 from ferret.auth.mail import Mailer, mailer_from_settings
 from ferret.config import Settings
 from ferret.keys import load_master_key
@@ -17,7 +18,12 @@ from ferret.web.templating import STATIC_DIR
 Clock = Callable[[], int]
 
 
-def create_app(*, clock: Clock | None = None, mailer: Mailer | None = None) -> FastAPI:
+def create_app(
+    *,
+    clock: Clock | None = None,
+    mailer: Mailer | None = None,
+    google: GoogleOAuth | None = None,
+) -> FastAPI:
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         settings = Settings.from_env()
@@ -27,6 +33,7 @@ def create_app(*, clock: Clock | None = None, mailer: Mailer | None = None) -> F
         app.state.settings = settings
         app.state.clock = clock or (lambda: int(time.time()))
         app.state.mailer = mailer or mailer_from_settings(settings)
+        app.state.google = google or google_from_settings(settings)
         settings.users_dir.mkdir(parents=True, exist_ok=True, mode=0o700)
         control.connect(settings.control_db_path).close()
         yield

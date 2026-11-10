@@ -24,6 +24,8 @@ class Settings:
     smtp_from: str = "Ferret <no-reply@localhost>"
     smtp_security: str = "starttls"
     dev_print_links: bool = False
+    google_client_id: str | None = None
+    google_client_secret: str | None = None
 
     @property
     def control_db_path(self) -> Path:
@@ -56,4 +58,6 @@ class Settings:
             smtp_from=_optional(environ, "FERRET_SMTP_FROM") or cls.smtp_from,
             smtp_security=security,
             dev_print_links=environ.get("FERRET_DEV_PRINT_LINKS") == "1",
+            google_client_id=_optional(environ, "FERRET_GOOGLE_CLIENT_ID"),
+            google_client_secret=environ.get("FERRET_GOOGLE_CLIENT_SECRET") or None,
         )

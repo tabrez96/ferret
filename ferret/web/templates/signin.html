@@ -34,6 +34,13 @@
     {% if state == "expired" %}
     <div class="notice notice-danger" role="alert"><strong>That sign-in link has expired.</strong><br>Links work once, for 15 minutes. Enter your email for a fresh one.</div>
     {% endif %}
+    {% if notice == "google_failed" %}
+    <div class="notice notice-danger" role="alert"><strong>We couldn't sign you in with Google.</strong><br>Try again, or use an email link instead.</div>
+    {% elif notice == "google_unverified" %}
+    <div class="notice notice-danger" role="alert"><strong>Google hasn't confirmed this email address.</strong><br>Confirm it with Google, or use an email link instead.</div>
+    {% elif notice == "google_unavailable" %}
+    <div class="notice notice-danger" role="alert"><strong>Google sign-in isn't set up here.</strong><br>Use an email link instead.</div>
+    {% endif %}
     <h2 id="signin-title">Sign in to Ferret</h2>
     {% if state == "form" %}<p class="muted">New here? The same steps create your account.</p>{% endif %}
     <a class="btn btn-secondary btn-block btn-google" href="/signin/google">

@@ -113,6 +113,19 @@ over SMTP; any provider's free tier works.
 For local testing without SMTP, `FERRET_DEV_PRINT_LINKS=1` prints sign-in links to the terminal. Never set it
 in production.
 
+### Google sign-in
+
+"Continue with Google" needs an OAuth client. In Google Cloud Console, create an OAuth client of type
+"Web application" and add `<FERRET_BASE_URL>/signin/google/callback` as an authorized redirect URI.
+Ferret asks Google only for `openid email`; Gmail access is requested separately, later.
+
+| Variable | Default | Meaning |
+|---|---|---|
+| `FERRET_GOOGLE_CLIENT_ID` | (unset) | Client ID of the OAuth client, like `1234-example.apps.googleusercontent.com`. |
+| `FERRET_GOOGLE_CLIENT_SECRET` | (unset) | Client secret of the OAuth client. |
+
+Without both, the button shows "Google sign-in isn't set up here." and the email link still works.
+
 Sign-in and session cookies are `Secure`. Browsers accept them on `http://127.0.0.1` and `localhost`;
 any other address needs HTTPS (Caddy provides it in production).
 

@@ -2,11 +2,13 @@ import logging
 import os
 import re
 from pathlib import Path
+from urllib.parse import parse_qs, urlencode, urlparse
 
 import pytest
 from fastapi.testclient import TestClient
 
 from ferret import control, keys
+from ferret.auth.google import GOOGLE_SCOPES, GoogleError, GoogleIdentity
 from ferret.auth.mail import MailError
 from ferret.web.app import create_app
 from ferret.web.security import CSRF_COOKIE
@@ -66,6 +68,30 @@ class FakeClock:
         self.now += seconds
 
 
+class FakeGoogle:
+    def __init__(self) -> None:
+        self.identity = GoogleIdentity("google-sub-1", "a@example.com", True)
+        self.fail = False
+        self.calls: list[dict] = []
+
+    def authorization_url(self, *, state: str, code_verifier: str, redirect_uri: str) -> str:
+        query = {"state": state, "redirect_uri": redirect_uri, "scope": GOOGLE_SCOPES}
+        return "https://accounts.google.test/auth?" + urlencode(query)
+
+    def fetch_identity(self, *, code: str, code_verifier: str, redirect_uri: str) -> GoogleIdentity:
+        self.calls.append(
+            {"code": code, "code_verifier": code_verifier, "redirect_uri": redirect_uri}
+        )
+        if self.fail:
+            raise GoogleError("fake failure")
+        return self.identity
+
+
+@pytest.fixture
+def google() -> FakeGoogle:
+    return FakeGoogle()
+
+
 @pytest.fixture
 def mailer() -> FakeMailer:
     return FakeMailer()
@@ -77,11 +103,11 @@ def clock() -> FakeClock:
 
 
 @pytest.fixture
-def app(monkeypatch, master_key_file, data_dir, clock, mailer):
+def app(monkeypatch, master_key_file, data_dir, clock, mailer, google):
     monkeypatch.setenv("FERRET_MASTER_KEY_FILE", str(master_key_file))
     monkeypatch.setenv("FERRET_DATA_DIR", str(data_dir))
     monkeypatch.setenv("FERRET_BASE_URL", "https://ferret.test")
-    return create_app(clock=clock, mailer=mailer)
+    return create_app(clock=clock, mailer=mailer, google=google)
 
 
 @pytest.fixture
@@ -107,3 +133,9 @@ def conn(data_dir):
     connection = control.connect(data_dir / "control.db")
     yield connection
     connection.close()
+
+
+def google_sign_in(client: TestClient):
+    start = client.get("/signin/google")
+    state = parse_qs(urlparse(start.headers["location"]).query)["state"][0]
+    return client.get("/signin/google/callback", params={"state": state, "code": "c"})

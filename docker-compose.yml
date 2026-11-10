@@ -15,6 +15,8 @@ services:
       FERRET_SMTP_PASSWORD: ${FERRET_SMTP_PASSWORD:-}
       FERRET_SMTP_FROM: ${FERRET_SMTP_FROM:-}
       FERRET_SMTP_SECURITY: ${FERRET_SMTP_SECURITY:-starttls}
+      FERRET_GOOGLE_CLIENT_ID: ${FERRET_GOOGLE_CLIENT_ID:-}
+      FERRET_GOOGLE_CLIENT_SECRET: ${FERRET_GOOGLE_CLIENT_SECRET:-}
     secrets:
       - ferret_master_key
     restart: unless-stopped
