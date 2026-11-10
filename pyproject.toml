@@ -7,6 +7,7 @@ dependencies = [
     "cryptography>=50.0.2",
     "fastapi>=0.162.2",
     "jinja2>=3.1.6",
+    "python-multipart>=0.0.33",
     "sqlcipher3-wheels>=0.5.7",
     "uvicorn>=0.54.0",
 ]
@@ -24,6 +25,10 @@ extend-exclude = ["design"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "B", "UP"]
+
+[tool.ruff.lint.flake8-bugbear]
+# FastAPI declares dependencies as argument defaults.
+extend-immutable-calls = ["fastapi.Depends", "fastapi.Form"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -63,12 +63,19 @@ CREATE TABLE problem_reports (
 
 # jobs.user_id has no foreign key on purpose: sweep_pending is global and delete_account removes
 # the user row itself. problem_reports has no user id by design.
-MIGRATIONS: list[str] = [_V1]
+_V2 = """
+ALTER TABLE sessions ADD COLUMN method TEXT NOT NULL DEFAULT 'email'
+    CHECK (method IN ('email', 'google'));
+"""
+
+MIGRATIONS: list[str] = [_V1, _V2]
 
 
 def connect(path: Path) -> sqlite3.Connection:
     path.parent.mkdir(parents=True, exist_ok=True)
-    conn = sqlite3.connect(path)
+    # FastAPI may run a request's sync dependencies and endpoint on different threadpool threads;
+    # each connection is still used by one request at a time.
+    conn = sqlite3.connect(path, check_same_thread=False)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON")
     conn.execute("PRAGMA journal_mode = WAL")
@@ -102,3 +109,7 @@ def load_dek(conn: sqlite3.Connection, kek: bytes, user_id: str) -> bytes:
     if row is None:
         raise LookupError("unknown user")
     return unwrap_dek(kek, row["wrapped_dek"], user_id)
+
+
+def get_user_by_email(conn: sqlite3.Connection, email: str) -> sqlite3.Row | None:
+    return conn.execute("SELECT id, email FROM users WHERE email = ?", (email,)).fetchone()

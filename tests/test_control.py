@@ -57,7 +57,10 @@ def test_problem_report_amounts_are_integers(conn):
 
 def test_deleting_user_cascades_sessions_and_tokens(conn, kek):
     user_id, _ = control.create_user(conn, kek, "a@example.com", now=1)
-    conn.execute("INSERT INTO sessions VALUES (?, ?, 1, 2)", (b"h", user_id))
+    conn.execute(
+        "INSERT INTO sessions (id_hash, user_id, created_at, expires_at) VALUES (?, ?, 1, 2)",
+        (b"h", user_id),
+    )
     conn.execute(
         "INSERT INTO mcp_tokens (user_id, token_hash, created_at) VALUES (?, ?, 1)",
         (user_id, b"t"),
