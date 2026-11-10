@@ -95,6 +95,27 @@ The container runs as uid 1000, so the key file must be readable by uid 1000. `F
 defaults to `./data`. User databases use SQLCipher through the `sqlcipher3-wheels` package, which
 bundles the library (no system package needed).
 
+### Sign-in email
+
+Users sign in with a link emailed to them. It works once and expires after 15 minutes. Ferret sends it
+over SMTP; any provider's free tier works.
+
+| Variable | Default | Meaning |
+|---|---|---|
+| `FERRET_BASE_URL` | `http://127.0.0.1:8000` | Public address of the site. Sign-in links are built from it. |
+| `FERRET_SMTP_HOST` | (unset) | SMTP server. Without it, sending the link fails with an inline error. |
+| `FERRET_SMTP_PORT` | `587` | SMTP port. |
+| `FERRET_SMTP_USERNAME` | (unset) | Login for the SMTP server, if it needs one. |
+| `FERRET_SMTP_PASSWORD` | (unset) | Password for that login. |
+| `FERRET_SMTP_FROM` | `Ferret <no-reply@localhost>` | Sender of the email. |
+| `FERRET_SMTP_SECURITY` | `starttls` | `starttls`, `ssl` or `none`. |
+
+For local testing without SMTP, `FERRET_DEV_PRINT_LINKS=1` prints sign-in links to the terminal. Never set it
+in production.
+
+Sign-in and session cookies are `Secure`. Browsers accept them on `http://127.0.0.1` and `localhost`;
+any other address needs HTTPS (Caddy provides it in production).
+
 `private/` and `data/` are git-ignored; real statements go in `private/statements/` only.
 
 ---

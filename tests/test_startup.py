@@ -5,17 +5,6 @@ from ferret.keys import MasterKeyError
 from ferret.web.app import create_app
 
 
-@pytest.fixture(autouse=True)
-def _restore_root_logging():
-    import logging
-
-    root = logging.getLogger()
-    handlers, level = list(root.handlers), root.level
-    yield
-    root.handlers[:] = handlers
-    root.setLevel(level)
-
-
 def test_refuses_to_start_without_key(monkeypatch, data_dir):
     monkeypatch.delenv("FERRET_MASTER_KEY_FILE", raising=False)
     monkeypatch.setenv("FERRET_DATA_DIR", str(data_dir))

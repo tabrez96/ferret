@@ -8,6 +8,13 @@ services:
     environment:
       FERRET_DATA_DIR: /app/data
       FERRET_MASTER_KEY_FILE: /run/secrets/ferret_master_key
+      FERRET_BASE_URL: ${FERRET_BASE_URL:-http://127.0.0.1:8000}
+      FERRET_SMTP_HOST: ${FERRET_SMTP_HOST:-}
+      FERRET_SMTP_PORT: ${FERRET_SMTP_PORT:-587}
+      FERRET_SMTP_USERNAME: ${FERRET_SMTP_USERNAME:-}
+      FERRET_SMTP_PASSWORD: ${FERRET_SMTP_PASSWORD:-}
+      FERRET_SMTP_FROM: ${FERRET_SMTP_FROM:-}
+      FERRET_SMTP_SECURITY: ${FERRET_SMTP_SECURITY:-starttls}
     secrets:
       - ferret_master_key
     restart: unless-stopped

@@ -1,3 +1,4 @@
+from ferret.auth.sessions import SessionUser
 from ferret.web.templating import templates
 
 
@@ -37,3 +38,21 @@ def test_lang_and_color_scheme():
     html = render()
     assert '<html lang="en">' in html
     assert 'name="color-scheme" content="light dark"' in html
+
+
+def test_sidebar_shows_account_and_sign_out():
+    user = SessionUser(user_id="u", email="a@example.com", method="email")
+    html = render(user=user, csrf_token="t")
+    assert "a@example.com" in html
+    assert "Signed in with an email link" in html
+    assert 'action="/signout"' in html
+    assert 'name="csrf_token" value="t"' in html
+    assert "Signed in with Google" in render(
+        user=SessionUser(user_id="u", email="a@example.com", method="google"), csrf_token="t"
+    )
+
+
+def test_sidebar_account_empty_without_user():
+    html = render()
+    assert "account-email" not in html
+    assert "Sign out" not in html

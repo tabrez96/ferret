@@ -10,6 +10,7 @@
   <script src="/static/js/htmx.min.js" defer></script>
 </head>
 <body>
+{% block body %}
   <a class="skip-link" href="#main">Skip to main content</a>
   <div class="shell">
     <aside class="sidebar">
@@ -30,11 +31,18 @@
             <span>Settings</span></a></li>
         </ul>
       </nav>
-      <div class="sidebar-account">{% block account %}{% endblock %}</div>
+      <div class="sidebar-account">{% block account %}{% if user %}
+        <p class="account-email">{{ user.email }}</p>
+        <p class="account-method">Signed in with {{ "Google" if user.method == "google" else "an email link" }}</p>
+        <form method="post" action="/signout">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          <button type="submit" class="link-button">Sign out</button>
+        </form>{% endif %}{% endblock %}</div>
     </aside>
     <main class="main" id="main" tabindex="-1">
       {% block content %}{% endblock %}
     </main>
   </div>
+{% endblock %}
 </body>
 </html>
