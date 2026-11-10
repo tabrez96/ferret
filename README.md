@@ -43,7 +43,7 @@ Control Gmail, saved statement passwords, chatbot access and the account
 
 | Layer | Choice | Reason |
 |---|---|---|
-| Language | Python 3.14 | Chosen for the product. Best PDF tooling, and existing open-source parsers for Indian banks are Python. |
+| Language | Python 3.15 | Chosen for the product. Best PDF tooling, and existing open-source parsers for Indian banks are Python. |
 | Packaging | uv, `pyproject.toml`, lockfile committed | Fast, reproducible installs; one command for dev and CI. |
 | Web framework | FastAPI + Uvicorn | Mature, typed, async; also hosts the MCP endpoint in the same process. |
 | Pages | Server-rendered Jinja2 templates + HTMX (vendored, no CDN) | The screens are tables, forms and one dialog; no SPA build chain needed. |
@@ -63,7 +63,7 @@ Control Gmail, saved statement passwords, chatbot access and the account
 | CI | GitHub Actions: lint and tests on every pull request | The code lives on GitHub; no extra service. |
 | Tests and lint | pytest, pytest-cov, ruff, reportlab (fixture generation only) | Boring defaults; reportlab draws the synthetic statements. |
 
-Python 3.14 is used until `sqlcipher3-wheels` publishes 3.15 wheels; then the project moves to 3.15.
+Python 3.15 is new. If any dependency has no 3.15 wheel yet, the Docker image builds it from source (build tools in a builder stage); the project does not pin an older Python.
 <!-- /about -->
 
 ## Development
