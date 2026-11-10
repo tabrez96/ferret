@@ -68,3 +68,25 @@ def test_deleting_user_cascades_sessions_and_tokens(conn, kek):
     conn.execute("DELETE FROM users WHERE id = ?", (user_id,))
     assert conn.execute("SELECT count(*) FROM sessions").fetchone()[0] == 0
     assert conn.execute("SELECT count(*) FROM mcp_tokens").fetchone()[0] == 0
+
+
+def test_get_user_by_google_sub(conn, kek):
+    user_id, _ = control.create_user(conn, kek, "a@example.com", now=1, google_sub="g1")
+    assert control.get_user_by_google_sub(conn, "g1")["id"] == user_id
+    assert control.get_user_by_google_sub(conn, "g2") is None
+    assert control.get_user_by_email(conn, "a@example.com")["google_sub"] == "g1"
+
+
+def test_link_google_sub(conn, kek):
+    user_id, _ = control.create_user(conn, kek, "a@example.com", now=1)
+    assert control.link_google_sub(conn, user_id, "g1")
+    assert control.link_google_sub(conn, user_id, "g1")
+    assert not control.link_google_sub(conn, user_id, "g2")
+    assert control.get_user_by_email(conn, "a@example.com")["google_sub"] == "g1"
+
+
+def test_link_google_sub_refuses_sub_owned_by_another_user(conn, kek):
+    control.create_user(conn, kek, "a@example.com", now=1, google_sub="g1")
+    other, _ = control.create_user(conn, kek, "b@example.com", now=1)
+    assert not control.link_google_sub(conn, other, "g1")
+    assert control.get_user_by_email(conn, "b@example.com")["google_sub"] is None

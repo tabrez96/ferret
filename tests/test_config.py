@@ -66,3 +66,14 @@ def test_invalid_smtp_settings():
         Settings.from_env({"FERRET_SMTP_SECURITY": "tls"})
     with pytest.raises(ValueError, match="must be a number"):
         Settings.from_env({"FERRET_SMTP_PORT": "x"})
+
+
+def test_google_settings():
+    assert Settings.from_env({}).google_client_id is None
+    s = Settings.from_env(
+        {"FERRET_GOOGLE_CLIENT_ID": " cid ", "FERRET_GOOGLE_CLIENT_SECRET": " secret "}
+    )
+    assert s.google_client_id == "cid"
+    assert s.google_client_secret == " secret "
+    s = Settings.from_env({"FERRET_GOOGLE_CLIENT_ID": "", "FERRET_GOOGLE_CLIENT_SECRET": ""})
+    assert s.google_client_id is None and s.google_client_secret is None
