@@ -3,8 +3,9 @@
 from collections.abc import Sequence
 
 from ferret.parsers.base import ParsedStatement, ParsedTransaction, ParseError, Parser
+from ferret.parsers.emirates_nbd import PARSER as EMIRATES_NBD
 
-PARSERS: tuple[Parser, ...] = ()  # bank modules append here in later tickets
+PARSERS: tuple[Parser, ...] = (EMIRATES_NBD,)  # one instance per supported bank
 
 
 def supported_banks(parsers: Sequence[Parser] = PARSERS) -> list[str]:
