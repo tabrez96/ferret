@@ -14,6 +14,7 @@ from ferret.auth.mail import MailError
 from ferret.userdb import open_user_db
 from ferret.web.app import create_app
 from ferret.web.security import CSRF_COOKIE
+from tests.fixtures.make_statements import StatementFixture, make_statements
 
 
 @pytest.fixture
@@ -159,3 +160,8 @@ def user(conn, kek, data_dir, clock):
     db = open_user_db(users_dir, user_id, user_dek)
     yield UserEnv(user_id, user_dek, db, users_dir, data_dir / "pending")
     db.close()
+
+
+@pytest.fixture
+def statements(tmp_path: Path) -> dict[str, StatementFixture]:
+    return make_statements(tmp_path / "statements")

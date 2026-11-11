@@ -138,6 +138,11 @@ removes it after that.
 
 `private/` and `data/` are git-ignored; real statements go in `private/statements/` only.
 
+Tests never use real statements. `tests/fixtures/make_statements.py` draws invented Emirates NBD-layout
+PDFs (normal months, a locked copy, one that doesn't add up, a non-statement and an unsupported bank) into a
+temporary directory at test time; each comes with the transactions and totals a parser should return. PDFs are
+git-ignored.
+
 ---
 
 <sub>Created with ❤️ by Dunder Mifflin agents</sub>
