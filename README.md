@@ -74,6 +74,7 @@ Requires [uv](https://docs.astral.sh/uv/); it installs Python 3.14 itself (see `
 uv sync                                        # install dependencies (dev included)
 uv run uvicorn ferret.web.app:app --reload     # run locally; health check at http://127.0.0.1:8000/healthz
 uv run python -m ferret.worker                 # background jobs: reading statements, hourly pending sweep
+uv run python -m ferret.tools.check_real ~/statements   # check parsers on real PDFs locally; writes nothing
 uv run pytest                                  # tests
 uv run pytest --cov=ferret                     # tests with coverage
 uv run ruff check . && uv run ruff format --check .   # lint and format check

@@ -1,4 +1,4 @@
-"""A parser for tests; the real registry is empty."""
+"""A parser for tests."""
 
 from datetime import date
 from decimal import Decimal
