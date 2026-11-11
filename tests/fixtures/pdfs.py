@@ -13,9 +13,11 @@ def make_pdf(lines: Sequence[str], password: str | None = None) -> bytes:
     for i, line in enumerate(lines):
         page.drawString(72, 800 - 14 * i, line)
     page.save()
-    if password is None:
-        return buf.getvalue()
+    return buf.getvalue() if password is None else encrypt_pdf(buf.getvalue(), password)
+
+
+def encrypt_pdf(data: bytes, password: str) -> bytes:
     out = io.BytesIO()
-    with pikepdf.open(io.BytesIO(buf.getvalue())) as pdf:
+    with pikepdf.open(io.BytesIO(data)) as pdf:
         pdf.save(out, encryption=pikepdf.Encryption(user=password, owner=password, R=6))
     return out.getvalue()
