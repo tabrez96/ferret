@@ -9,6 +9,8 @@ dependencies = [
     "fastapi>=0.162.2",
     "httpx>=0.28.1",
     "jinja2>=3.1.6",
+    "pdfplumber>=0.11.10",
+    "pikepdf>=10.18.0",
     "python-multipart>=0.0.33",
     "sqlcipher3-wheels>=0.5.7",
     "uvicorn>=0.54.0",
@@ -44,5 +46,6 @@ branch = true
 dev = [
     "pytest>=9.2.0",
     "pytest-cov>=7.1.0",
+    "reportlab>=5.1.0",
     "ruff>=0.17.4",
 ]

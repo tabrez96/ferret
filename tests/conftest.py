@@ -1,6 +1,7 @@
 import logging
 import os
 import re
+from dataclasses import dataclass
 from pathlib import Path
 from urllib.parse import parse_qs, urlencode, urlparse
 
@@ -10,6 +11,7 @@ from fastapi.testclient import TestClient
 from ferret import control, keys
 from ferret.auth.google import GOOGLE_SCOPES, GoogleError, GoogleIdentity
 from ferret.auth.mail import MailError
+from ferret.userdb import open_user_db
 from ferret.web.app import create_app
 from ferret.web.security import CSRF_COOKIE
 
@@ -139,3 +141,21 @@ def google_sign_in(client: TestClient):
     start = client.get("/signin/google")
     state = parse_qs(urlparse(start.headers["location"]).query)["state"][0]
     return client.get("/signin/google/callback", params={"state": state, "code": "c"})
+
+
+@dataclass
+class UserEnv:
+    user_id: str
+    dek: bytes
+    db: object
+    users_dir: Path
+    pending_dir: Path
+
+
+@pytest.fixture
+def user(conn, kek, data_dir, clock):
+    user_id, user_dek = control.create_user(conn, kek, "u@example.com", now=clock())
+    users_dir = data_dir / "users"
+    db = open_user_db(users_dir, user_id, user_dek)
+    yield UserEnv(user_id, user_dek, db, users_dir, data_dir / "pending")
+    db.close()

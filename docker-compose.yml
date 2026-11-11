@@ -26,6 +26,18 @@ services:
       timeout: 5s
       retries: 3
 
+  worker:
+    build: .
+    command: ["python", "-m", "ferret.worker"]
+    volumes:
+      - ./data:/app/data
+    environment:
+      FERRET_DATA_DIR: /app/data
+      FERRET_MASTER_KEY_FILE: /run/secrets/ferret_master_key
+    secrets:
+      - ferret_master_key
+    restart: unless-stopped
+
 secrets:
   ferret_master_key:
     file: ./secrets/ferret_master_key

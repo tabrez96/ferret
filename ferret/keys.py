@@ -75,6 +75,10 @@ def field_key(dek: bytes) -> bytes:
     return _subkey(dek, b"ferret/field/v1")
 
 
+def pending_key(dek: bytes) -> bytes:
+    return _subkey(dek, b"ferret/pending/v1")
+
+
 def _field_aad(field: str) -> bytes:
     return b"ferret/field/v1:" + field.encode()
 
