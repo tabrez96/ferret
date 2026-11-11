@@ -73,6 +73,7 @@ Requires [uv](https://docs.astral.sh/uv/); it installs Python 3.14 itself (see `
 ```
 uv sync                                        # install dependencies (dev included)
 uv run uvicorn ferret.web.app:app --reload     # run locally; health check at http://127.0.0.1:8000/healthz
+uv run python -m ferret.worker                 # background jobs: reading statements, hourly pending sweep
 uv run pytest                                  # tests
 uv run pytest --cov=ferret                     # tests with coverage
 uv run ruff check . && uv run ruff format --check .   # lint and format check
@@ -128,6 +129,12 @@ Without both, the button shows "Google sign-in isn't set up here." and the email
 
 Sign-in and session cookies are `Secure`. Browsers accept them on `http://127.0.0.1` and `localhost`;
 any other address needs HTTPS (Caddy provides it in production).
+
+### Statement files
+
+Statement files are deleted as soon as they have been read, whatever the outcome. A locked file with no
+working password waits, encrypted with your data key, in `data/pending/` for at most 7 days; the worker
+removes it after that.
 
 `private/` and `data/` are git-ignored; real statements go in `private/statements/` only.
 

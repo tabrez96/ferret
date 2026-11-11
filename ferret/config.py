@@ -35,6 +35,10 @@ class Settings:
     def users_dir(self) -> Path:
         return self.data_dir / "users"
 
+    @property
+    def pending_dir(self) -> Path:
+        return self.data_dir / "pending"
+
     @classmethod
     def from_env(cls, environ: Mapping[str, str] = os.environ) -> Settings:
         data_dir = Path(environ.get("FERRET_DATA_DIR", "data"))
