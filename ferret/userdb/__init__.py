@@ -25,7 +25,8 @@ def user_db_path(users_dir: Path, user_id: str) -> Path:
 def open_user_db(users_dir: Path, user_id: str, dek: bytes) -> sqlcipher.Connection:
     path = user_db_path(users_dir, user_id)
     users_dir.mkdir(parents=True, exist_ok=True, mode=0o700)
-    conn = sqlcipher.connect(str(path))
+    # A request's connection may hop worker threads, but is never used concurrently.
+    conn = sqlcipher.connect(str(path), check_same_thread=False)
     # Raw-key form (no passphrase KDF). Must be the first statement on the connection.
     conn.execute(f"PRAGMA key = \"x'{sqlcipher_key(dek).hex()}'\"")
     row = conn.execute("PRAGMA cipher_version").fetchone()

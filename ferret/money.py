@@ -23,3 +23,13 @@ def to_minor(amount: Decimal, currency: str) -> int:
 
 def from_minor(minor: int, currency: str) -> Decimal:
     return Decimal(minor).scaleb(-minor_exponent(currency))
+
+
+def format_amount(minor: int, currency: str) -> str:
+    """Currency code before the number: format_amount(428675, "AED") == "AED 4,286.75".
+
+    Negative amounts get a leading minus: "-AED 12.50".
+    """
+    exp = minor_exponent(currency)
+    text = f"{currency} {from_minor(abs(minor), currency):,.{exp}f}"
+    return f"-{text}" if minor < 0 else text

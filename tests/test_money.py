@@ -2,7 +2,7 @@ from decimal import Decimal
 
 import pytest
 
-from ferret.money import from_minor, to_minor
+from ferret.money import format_amount, from_minor, to_minor
 
 
 def test_to_minor_round_trip():
@@ -32,3 +32,11 @@ def test_unknown_currency():
 
 def test_negative_amounts():
     assert to_minor(Decimal("-5.00"), "AED") == -500
+
+
+def test_format_amount_groups_thousands():
+    assert format_amount(428675, "AED") == "AED 4,286.75"
+
+
+def test_format_amount_negative():
+    assert format_amount(-1250, "AED") == "-AED 12.50"

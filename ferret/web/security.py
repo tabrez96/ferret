@@ -6,10 +6,12 @@ from collections.abc import Awaitable, Callable, Iterator
 
 from fastapi import Depends, HTTPException, Request, Response
 from fastapi.responses import RedirectResponse
+from sqlcipher3 import dbapi2 as sqlcipher
 
 from ferret import control
 from ferret.auth.sessions import SESSION_TTL_SECONDS, SessionUser, get_session_user
 from ferret.auth.tokens import new_token
+from ferret.userdb import open_user_db
 
 SESSION_COOKIE = "ferret_session"
 CSRF_COOKIE = "ferret_csrf"
@@ -76,6 +78,20 @@ def require_user(user: SessionUser | None = Depends(current_user)) -> SessionUse
     if user is None:
         raise SignedOutError
     return user
+
+
+def user_db(
+    request: Request,
+    user: SessionUser = Depends(require_user),
+    conn: sqlite3.Connection = Depends(control_conn),
+) -> Iterator[sqlcipher.Connection]:
+    state = request.app.state
+    dek = control.load_dek(conn, state.kek, user.user_id)
+    db = open_user_db(state.settings.users_dir, user.user_id, dek)
+    try:
+        yield db
+    finally:
+        db.close()
 
 
 def signed_out_handler(request: Request, exc: SignedOutError) -> Response:
