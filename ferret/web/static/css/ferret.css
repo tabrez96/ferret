@@ -610,3 +610,79 @@ a { color: var(--amber-strong); }
   .history { overflow-x: auto; }
   .dropzone { flex-wrap: wrap; }
 }
+
+/* S04 statement password dialog */
+.password-dialog {
+  width: 480px;
+  max-width: calc(100vw - 32px);
+  padding: 28px;
+  border: 0;
+  border-radius: var(--radius-dialog);
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 24px 48px var(--shadow);
+}
+
+.password-dialog::backdrop { background: var(--backdrop); }
+
+.lock-tile {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-btn);
+  background: var(--amber-tint);
+  color: var(--amber-strong);
+}
+
+.password-form h2 { margin: 16px 0 4px; font: 600 20px/28px var(--font); }
+.dialog-meta { margin: 0 0 12px; font-size: 13px; line-height: 18px; color: var(--ink-muted); }
+.dialog-meta strong { color: var(--ink); }
+.dialog-text { margin: 0 0 20px; font-size: 14px; line-height: 20px; }
+.password-form label { display: block; margin-bottom: 6px; font-weight: 600; }
+
+.password-field { position: relative; }
+
+.password-field input {
+  box-sizing: border-box;
+  width: 100%;
+  height: 44px;
+  padding: 0 64px 0 12px;
+  border: 1px solid var(--field-line);
+  border-radius: var(--radius-btn);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+}
+
+.password-field input[aria-invalid="true"] { border: 2px solid var(--danger); }
+
+.password-toggle {
+  position: absolute;
+  top: 0;
+  right: 4px;
+  height: 44px;
+  padding: 0 8px;
+  border: 0;
+  background: none;
+  color: var(--amber-strong);
+  font: 600 13px/1 var(--font);
+  cursor: pointer;
+}
+
+.password-form .field-error { margin: 6px 0 0; font-size: 13px; line-height: 18px; color: var(--danger); }
+.field-hint { margin: 6px 0 0; font-size: 13px; line-height: 18px; color: var(--ink-muted); }
+.dialog-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; }
+
+.dialog-footer {
+  margin: 16px 0 0;
+  padding-top: 16px;
+  border-top: 1px solid var(--line-soft);
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--ink-muted);
+}
+
+.password-form .when-busy { display: none; }
+.password-form.htmx-request .when-busy { display: inline-flex; gap: 8px; align-items: center; }
+.password-form.htmx-request .when-idle { display: none; }

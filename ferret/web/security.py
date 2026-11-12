@@ -80,14 +80,20 @@ def require_user(user: SessionUser | None = Depends(current_user)) -> SessionUse
     return user
 
 
-def user_db(
+def user_dek(
     request: Request,
     user: SessionUser = Depends(require_user),
     conn: sqlite3.Connection = Depends(control_conn),
+) -> bytes:
+    return control.load_dek(conn, request.app.state.kek, user.user_id)
+
+
+def user_db(
+    request: Request,
+    user: SessionUser = Depends(require_user),
+    dek: bytes = Depends(user_dek),
 ) -> Iterator[sqlcipher.Connection]:
-    state = request.app.state
-    dek = control.load_dek(conn, state.kek, user.user_id)
-    db = open_user_db(state.settings.users_dir, user.user_id, dek)
+    db = open_user_db(request.app.state.settings.users_dir, user.user_id, dek)
     try:
         yield db
     finally:
