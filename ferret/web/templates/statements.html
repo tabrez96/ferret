@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Statements · Ferret{% endblock %}
+{% block content %}
+<h1 class="page-title">Statements</h1>
+<p class="page-lead">Every statement is checked before its numbers are saved. Files are deleted right after reading.</p>
+
+<section class="card dropzone" id="upload" data-dropzone tabindex="-1" aria-labelledby="upload-title">
+  <svg class="dropzone-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5M4 15v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4"/></svg>
+  <div class="dropzone-text">
+    <p class="dropzone-title" id="upload-title">Drop a statement PDF here</p>
+    <p class="trust-line">Ferret reads the file, checks the totals, then deletes it.</p>
+  </div>
+  <input type="file" id="statement-file" name="files" accept=".pdf,application/pdf" multiple hidden>
+  <button type="button" class="btn btn-primary" data-pick-file>Choose PDF</button>
+</section>
+
+{% if not rows %}
+<section class="card empty-state">
+  <h2>No statements yet</h2>
+  <p class="muted">Statements you upload or that arrive in Gmail show up here, with whether they added up.</p>
+</section>
+{% else %}
+<section class="card history" aria-labelledby="history-title">
+  <h2 id="history-title">History</h2>
+  <table class="history-table">
+    <thead>
+      <tr>
+        <th scope="col">Statement</th>
+        <th scope="col">Card</th>
+        <th scope="col">From</th>
+        <th scope="col">Status</th>
+        <th scope="col" class="num">Spent</th>
+        <th scope="col"><span class="visually-hidden">Action</span></th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for row in rows %}
+      <tr>
+        <th scope="row">{{ row.month }}</th>
+        <td>{{ row.card }}</td>
+        <td class="meta">{{ row.source }}</td>
+        <td>
+          <span class="chip chip-{{ row.chip_tone }}">{{ row.chip_label }}</span>
+          {% if row.note %}<div class="row-note">{{ row.note }}</div>{% endif %}
+        </td>
+        <td class="num">{{ row.spent }}</td>
+        <td>
+          {% if row.status == "needs_password" %}
+          <a class="btn btn-primary" href="/statements/{{ row.id }}/password">Enter password</a>
+          {% endif %}
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endif %}
+<script src="/static/js/statements.js" defer></script>
+{% endblock %}
