@@ -46,7 +46,7 @@
         <td class="num">{{ row.spent }}</td>
         <td>
           {% if row.status == "needs_password" %}
-          <a class="btn btn-primary" href="/statements/{{ row.id }}/password">Enter password</a>
+          <a class="btn btn-primary" hx-get="/statements/{{ row.id }}/password" hx-target="#dialog-root" data-password-opener="{{ row.id }}" href="/statements/{{ row.id }}/password">Enter password</a>
           {% endif %}
         </td>
       </tr>
@@ -55,5 +55,6 @@
   </table>
 </section>
 {% endif %}
+<div id="dialog-root">{% if dialog %}{% include "password_dialog.html" %}{% endif %}</div>
 <script src="/static/js/statements.js" defer></script>
 {% endblock %}

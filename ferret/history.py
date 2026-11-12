@@ -25,6 +25,7 @@ SELECT s.id, s.status, s.source, s.received_at, s.bank, s.period_end, s.currency
 FROM statements s LEFT JOIN cards c ON c.id = s.card_id
 ORDER BY s.received_at DESC, s.id DESC
 """
+QUERY_ONE = QUERY.split("ORDER BY")[0] + "WHERE s.id = ?\n"
 
 
 @dataclass(frozen=True)
@@ -87,3 +88,8 @@ def to_row(row) -> HistoryRow:
 
 def load_history(user_db) -> list[HistoryRow]:
     return [to_row(r) for r in user_db.execute(QUERY).fetchall()]
+
+
+def load_row(user_db, statement_id: int) -> HistoryRow | None:
+    row = user_db.execute(QUERY_ONE, (statement_id,)).fetchone()
+    return to_row(row) if row else None
