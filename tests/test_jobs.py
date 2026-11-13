@@ -62,3 +62,9 @@ def test_ensure_scheduled_idempotent(conn):
     jobs.claim_next(conn, now=5)
     jobs.ensure_scheduled(conn, "sweep_pending", now=6, run_after=6)
     assert conn.execute("SELECT count(*) FROM jobs").fetchone()[0] == 1
+
+
+def test_schedule_user_job_once_per_user(conn):
+    assert jobs.schedule_user_job(conn, "gmail_poll", A, now=1, run_after=10) is True
+    assert jobs.schedule_user_job(conn, "gmail_poll", A, now=1, run_after=10) is False
+    assert jobs.schedule_user_job(conn, "gmail_poll", B, now=1, run_after=10) is True
