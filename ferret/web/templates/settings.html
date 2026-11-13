@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Settings · Ferret{% endblock %}
+{% block content %}
+<h1 class="page-title">Settings</h1>
+
+<div class="settings-grid">
+  <section class="card settings-card" aria-labelledby="gmail-title">
+    <h2 id="gmail-title">Gmail</h2>
+    <p class="settings-status">
+      {% if gmail is none %}<span class="chip chip-neutral">Not connected</span>
+      {% else %}<span class="chip {{ 'chip-ok' if gmail.status == 'connected' else 'chip-warn' }}">{{ "Connected" if gmail.status == "connected" else "Stopped" }}</span> <strong>{{ gmail.email }}</strong>{% endif %}
+    </p>
+    <p>Read-only. Ferret only opens emails from supported banks that carry a statement, and never keeps the email or the attachment.</p>
+  </section>
+
+  <section class="card settings-card" aria-labelledby="mcp-title">
+    <h2 id="mcp-title">AI chatbots (MCP)</h2>
+    <p>Let a chatbot such as Claude answer questions about your spending. It can read transactions and totals. It can't change anything.</p>
+  </section>
+</div>
+
+<section class="card settings-card" aria-labelledby="passwords-title">
+  <h2 id="passwords-title">Statement passwords</h2>
+  <p>Saved per card and encrypted with your own key, kept apart from your data. Ferret can see that one is saved; nobody can view it here, including you.</p>
+  {% if not rows %}
+  <p class="muted settings-empty">Passwords appear here after your first locked statement.</p>
+  {% else %}
+  <div class="passwords-table-wrap">
+    <table class="history-table passwords-table">
+      <thead>
+        <tr><th scope="col">Card</th><th scope="col">Password</th><th scope="col">Last used</th><th scope="col"><span class="visually-hidden">Actions</span></th></tr>
+      </thead>
+      <tbody>
+      {% for row in rows %}
+        <tr>
+          <th scope="row">{{ row.card }}</th>
+          <td>{% if row.saved %}<span class="chip chip-ok">Saved</span>{% else %}<span class="chip chip-neutral">Not saved</span>{% endif %}</td>
+          <td class="meta">{{ row.last_used }}</td>
+          <td>
+            {% if row.saved %}
+            <a class="text-action" href="/settings/passwords/{{ row.password_id }}/replace" hx-get="/settings/passwords/{{ row.password_id }}/replace" hx-target="#dialog-root" data-password-opener aria-label="Replace password for {{ row.card }}">Replace</a>
+            {% else %}
+            <span class="meta">Asked for on the next statement</span>
+            {% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+</section>
+
+<section class="card settings-card danger-card" aria-labelledby="delete-title">
+  <h2 id="delete-title">Delete account</h2>
+  <p>Permanently deletes your transactions, saved passwords, Gmail connection, chatbot tokens and any files still waiting to be read. This can't be undone.</p>
+  <button type="button" class="btn btn-danger" disabled>Delete account…</button>
+</section>
+
+<div id="dialog-root">{% if dialog %}{% include dialog %}{% endif %}</div>
+<script src="/static/js/statements.js" defer></script>
+{% endblock %}

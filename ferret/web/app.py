@@ -11,7 +11,7 @@ from ferret.auth.mail import Mailer, mailer_from_settings
 from ferret.config import Settings
 from ferret.keys import load_master_key
 from ferret.logging import setup_logging
-from ferret.web import pages, signin, statement_password
+from ferret.web import pages, settings, signin, statement_password
 from ferret.web.security import SignedOutError, csrf_cookie_middleware, signed_out_handler
 from ferret.web.templating import STATIC_DIR
 
@@ -52,6 +52,7 @@ def create_app(
     app.include_router(signin.router)
     app.include_router(pages.router)
     app.include_router(statement_password.router)
+    app.include_router(settings.router)
     return app
 
 
