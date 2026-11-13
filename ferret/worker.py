@@ -1,4 +1,4 @@
-"""Background worker: reads statements and sweeps expired pending files."""
+"""Background worker: reads statements, polls Gmail and sweeps expired pending files."""
 
 import logging
 import sqlite3
@@ -9,6 +9,8 @@ from pathlib import Path
 
 from ferret import control, jobs
 from ferret.config import Settings
+from ferret.gmail.client import GmailFactory
+from ferret.gmail.poll import POLL_INTERVAL_SECONDS, gmail_connected, poll_gmail
 from ferret.keys import load_master_key
 from ferret.logging import setup_logging
 from ferret.parsers import PARSERS, Parser
@@ -30,6 +32,7 @@ class WorkerContext:
     pending_dir: Path
     clock: Callable[[], int]
     parsers: Sequence[Parser] = PARSERS
+    gmail_factory: GmailFactory | None = None
 
 
 def _parse_statement(ctx: WorkerContext, job: jobs.Job, now: int) -> None:
@@ -47,6 +50,38 @@ def _parse_statement(ctx: WorkerContext, job: jobs.Job, now: int) -> None:
         )
     finally:
         user_db.close()
+
+
+def _gmail_poll(ctx: WorkerContext, job: jobs.Job, now: int) -> None:
+    if ctx.gmail_factory is None:
+        logger.warning("gmail_poll: Google client is not configured")
+        return
+    dek = control.load_dek(ctx.control, ctx.kek, job.user_id)
+    user_db = open_user_db(ctx.users_dir, job.user_id, dek)
+    try:
+        poll_gmail(
+            ctx.control,
+            user_db,
+            dek,
+            ctx.pending_dir,
+            job.user_id,
+            gmail_factory=ctx.gmail_factory,
+            now=now,
+            parsers=ctx.parsers,
+        )
+    finally:
+        try:
+            # Even after a failure the next poll is 6 hours away; a stopped account is not polled.
+            if gmail_connected(user_db):
+                jobs.schedule_user_job(
+                    ctx.control,
+                    "gmail_poll",
+                    job.user_id,
+                    now=now,
+                    run_after=now + POLL_INTERVAL_SECONDS,
+                )
+        finally:
+            user_db.close()
 
 
 def _sweep(ctx: WorkerContext, now: int) -> None:
@@ -73,6 +108,8 @@ def run_once(ctx: WorkerContext) -> bool:
     try:
         if job.kind == "parse_statement":
             _parse_statement(ctx, job, now)
+        elif job.kind == "gmail_poll":
+            _gmail_poll(ctx, job, now)
         elif job.kind == "sweep_pending":
             _sweep(ctx, now)
         else:

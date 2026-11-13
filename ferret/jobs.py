@@ -102,3 +102,17 @@ def ensure_scheduled(conn: sqlite3.Connection, kind: str, *, now: int, run_after
     ).fetchone()
     if row is None:
         enqueue(conn, kind, user_id=None, now=now, run_after=run_after)
+
+
+def schedule_user_job(
+    conn: sqlite3.Connection, kind: str, user_id: str, *, now: int, run_after: int
+) -> bool:
+    """Enqueue a job for one user unless one of that kind is already queued for them."""
+    row = conn.execute(
+        "SELECT 1 FROM jobs WHERE kind = ? AND user_id = ? AND status = 'queued' LIMIT 1",
+        (kind, user_id),
+    ).fetchone()
+    if row is not None:
+        return False
+    enqueue(conn, kind, user_id=user_id, now=now, run_after=run_after)
+    return True
