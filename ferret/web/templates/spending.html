@@ -1,5 +1,114 @@
 {% extends "base.html" %}
 {% block title %}Spending · Ferret{% endblock %}
+{% macro status_chips() %}
+<div class="status-chips">
+  {% if counts.total %}<span class="chip chip-ok">{{ counts.reconciled }} of {{ counts.total }} statements reconciled</span>{% endif %}
+  {% if counts.needs_password %}<a class="chip chip-warn" href="/statements">{{ counts.needs_password }} statement{{ " needs" if counts.needs_password == 1 else "s need" }} a password</a>{% endif %}
+</div>
+{% endmacro %}
 {% block content %}
-<h1 class="page-title">Spending</h1>
+<header class="spending-head">
+  <div>
+    <h1 class="page-title">Spending</h1>
+    <p class="page-lead">{{ "Nothing here yet" if state == "first_run" else source_line }}</p>
+  </div>
+  {% if state != "first_run" %}
+  <form class="spending-filters" method="get" action="/" data-autosubmit>
+    <label class="visually-hidden" for="filter-month">Month</label>
+    <select id="filter-month" name="month">
+      {% for value, label in months %}<option value="{{ value }}"{% if value == month %} selected{% endif %}>{{ label }}</option>{% endfor %}
+    </select>
+    <label class="visually-hidden" for="filter-card">Card</label>
+    <select id="filter-card" name="card">
+      <option value="">All cards</option>
+      {% for id, label in cards %}<option value="{{ id }}"{% if id == card_id %} selected{% endif %}>{{ label }}</option>{% endfor %}
+    </select>
+    <button type="submit" class="btn btn-secondary">Show</button>
+  </form>
+  {% endif %}
+</header>
+
+{% if state == "first_run" %}
+<section class="card empty-state first-run">
+  <img src="/static/img/mark.svg" alt="" width="80" height="80">
+  <h2>Let's find your spending</h2>
+  <p class="muted">Give Ferret your card statements and it does the rest.</p>
+  <div class="first-run-options">
+    <div class="card first-run-option">
+      <h3>Upload a statement</h3>
+      <p class="muted">A PDF from your bank. Locked files are fine; you'll enter the password once.</p>
+      <a class="btn btn-secondary" href="/statements#upload">Choose a PDF</a>
+    </div>
+  </div>
+  <p class="muted">Supported now: Emirates NBD. HDFC, ICICI, SBI, IndusInd and AU Bank are coming one at a time.</p>
+</section>
+
+{% elif state == "no_statement" %}
+<section class="card empty-state">
+  <p>No statement for {{ month_name }} yet. It usually arrives in the first week of the next month.</p>
+  <p><a href="/statements">Go to Statements</a></p>
+  {{ status_chips() }}
+</section>
+
+{% else %}
+<div class="spending-top">
+  <section class="card panel" aria-labelledby="total-title">
+    <h2 class="panel-label" id="total-title">Spent in {{ month_name }}</h2>
+    {% for t, compare in totals %}
+    <p class="total-amount num">{{ t.spent_minor|money(t.currency) }}</p>
+    <p class="muted">{{ compare }}</p>
+    {% endfor %}
+    {{ status_chips() }}
+  </section>
+  <section class="card panel" aria-labelledby="cards-title">
+    <h2 class="panel-label" id="cards-title">By card</h2>
+    <ul class="card-totals">
+      {% for c in card_totals %}<li><span>{{ c.label }}</span><span class="num">{{ c.spent_minor|money(c.currency) }}</span></li>{% endfor %}
+    </ul>
+  </section>
+  <section class="card panel" aria-labelledby="months-title">
+    <h2 class="panel-label" id="months-title">Last 6 months</h2>
+    {% for ch in charts %}
+    {% if charts|length > 1 %}<p class="muted">{{ ch.currency }}</p>{% endif %}
+    <svg class="month-chart" viewBox="0 0 252 118" role="img" aria-label="{{ ch.aria_label }}">
+      {% for b in ch.bars %}
+      <rect class="{{ 'bar-current' if b.current else 'bar-past' }}" x="{{ b.x }}" y="{{ b.y }}" width="28" height="{{ b.height }}" rx="4"/>
+      <text class="chart-label{{ ' current' if b.current }}" x="{{ b.x + 14 }}" y="114" text-anchor="middle">{{ b.label }}</text>
+      {% endfor %}
+    </svg>
+    {% endfor %}
+  </section>
+</div>
+<div class="spending-bottom">
+  <section class="card panel" aria-labelledby="merchants-title">
+    <h2 class="panel-title" id="merchants-title">Top merchants</h2>
+    {% for currency, items in merchants.items() %}
+    <ol class="merchant-list">
+      {% for m in items %}
+      <li><span class="merchant-name">{{ m.merchant }}</span>
+        <svg class="merchant-bar" viewBox="0 0 100 6" preserveAspectRatio="none" aria-hidden="true"><rect class="bar-track" width="100" height="6" rx="3"/><rect class="bar-fill" width="{{ m.width }}" height="6" rx="3"/></svg>
+        <span class="num">{{ m.amount }}</span></li>
+      {% endfor %}
+    </ol>
+    {% endfor %}
+  </section>
+  <section class="card panel tx" aria-labelledby="tx-title">
+    <h2 class="panel-title" id="tx-title">Transactions</h2>
+    <table class="history-table tx-table">
+      <thead><tr><th scope="col">Date</th><th scope="col">Merchant</th><th scope="col">Card</th><th scope="col" class="num">Amount</th></tr></thead>
+      <tbody>
+      {% for r in rows %}
+        <tr>
+          <td class="meta">{{ r.posted_on|short_day }}</td>
+          <td>{{ r.merchant }}{% if r.is_credit %} <span class="chip chip-ok">Refund</span>{% endif %}</td>
+          <td class="meta">{{ r.card }}</td>
+          <td class="num{{ ' amount-refund' if r.is_credit }}">{{ r.amount_minor|money(r.currency) }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </section>
+</div>
+{% endif %}
+<script src="/static/js/spending.js" defer></script>
 {% endblock %}
