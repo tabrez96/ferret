@@ -2,7 +2,7 @@
 name = "ferret"
 version = "0.1.0"
 description = "Credit card spending visibility from your statements, with no manual entry"
-requires-python = ">=3.14"
+requires-python = ">=3.15"
 dependencies = [
     "authlib>=1.9.5",
     "cryptography>=50.0.2",

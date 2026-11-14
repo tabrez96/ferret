@@ -1,14 +1,19 @@
 services:
   web:
     build: .
-    ports:
-      - "8000:8000"
+    expose: ["8000"]
+    # Trusting every forwarded address is safe only because port 8000 is reachable solely from the compose network.
+    command:
+      [
+        "uvicorn", "ferret.web.app:app", "--host", "0.0.0.0", "--port", "8000",
+        "--proxy-headers", "--forwarded-allow-ips", "*",
+      ]
     volumes:
       - ./data:/app/data
     environment:
       FERRET_DATA_DIR: /app/data
       FERRET_MASTER_KEY_FILE: /run/secrets/ferret_master_key
-      FERRET_BASE_URL: ${FERRET_BASE_URL:-http://127.0.0.1:8000}
+      FERRET_BASE_URL: https://${FERRET_DOMAIN:?set FERRET_DOMAIN in .env}
       FERRET_SMTP_HOST: ${FERRET_SMTP_HOST:-}
       FERRET_SMTP_PORT: ${FERRET_SMTP_PORT:-587}
       FERRET_SMTP_USERNAME: ${FERRET_SMTP_USERNAME:-}
@@ -29,6 +34,7 @@ services:
   worker:
     build: .
     command: ["python", "-m", "ferret.worker"]
+    depends_on: [web]
     volumes:
       - ./data:/app/data
     environment:
@@ -37,6 +43,25 @@ services:
     secrets:
       - ferret_master_key
     restart: unless-stopped
+
+  caddy:
+    image: caddy:2
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      FERRET_DOMAIN: ${FERRET_DOMAIN:?set FERRET_DOMAIN in .env}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on: [web]
+    restart: unless-stopped
+
+volumes:
+  caddy_data: {}
+  caddy_config: {}
 
 secrets:
   ferret_master_key:

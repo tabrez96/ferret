@@ -1,12 +1,13 @@
 """S01: sign in with an emailed link, and sign out."""
 
+import hashlib
 import hmac
 import sqlite3
 
 from fastapi import APIRouter, Depends, Form, Request
 from fastapi.responses import RedirectResponse, Response
 
-from ferret import control
+from ferret import control, ratelimit
 from ferret.auth import links
 from ferret.auth.google import GoogleError
 from ferret.auth.mail import MailError, signin_email
@@ -34,6 +35,9 @@ router = APIRouter()
 GOOGLE_COOKIE = "ferret_google"
 GOOGLE_COOKIE_SECONDS = 600
 _MAX_GOOGLE_COOKIE = 300
+LINKS_PER_EMAIL = 5
+LINKS_PER_IP = 20
+LINK_LIMIT_WINDOW_SECONDS = 3600
 
 
 def render(
@@ -82,6 +86,14 @@ def request_link(
             email=email.strip(),
             error="Enter your email address, like you@example.com.",
         )
+    if not _link_allowed(request, conn, normalized):
+        return render(
+            request,
+            "form",
+            email=normalized,
+            error="Too many sign-in links were requested. Try again in an hour.",
+            status=429,
+        )
     token = links.issue_link(conn, normalized, now=now(request))
     link = f"{request.app.state.settings.base_url}/signin/link?token={token}"
     subject, body = signin_email(link)
@@ -95,6 +107,19 @@ def request_link(
             error="We couldn't send the link. Try again in a minute.",
         )
     return render(request, "sent", email=normalized)
+
+
+def _link_allowed(request: Request, conn: sqlite3.Connection, email: str) -> bool:
+    ip = request.client.host if request.client else "unknown"
+    email_key = hashlib.sha256(email.encode()).hexdigest()  # the limiter table holds no addresses
+    at = now(request)
+    # Both buckets are charged only when both allow: a refused request costs nothing.
+    return ratelimit.allow_all(
+        conn,
+        [(f"signin-ip:{ip}", LINKS_PER_IP), (f"signin-email:{email_key}", LINKS_PER_EMAIL)],
+        now=at,
+        window=LINK_LIMIT_WINDOW_SECONDS,
+    )
 
 
 @router.get("/signin/link")

@@ -66,9 +66,40 @@ Control Gmail, saved statement passwords, chatbot access and the account
 Python 3.15 is new. If any dependency has no 3.15 wheel yet, the Docker image builds it from source (build tools in a builder stage); the project does not pin an older Python.
 <!-- /about -->
 
+## Self-hosting
+
+Ferret runs as three containers from `docker-compose.yml`: `caddy` (HTTPS on ports 80 and 443, with
+certificates from Let's Encrypt), `web` and `worker`. The app itself is not published; only Caddy is.
+
+1. Point a DNS name at your server and open ports 80 and 443.
+2. `cp .env.example .env` and fill it in.
+3. Create the master key (see [Master key](#master-key)). Compose mounts it as a secret from
+   `secrets/ferret_master_key`, never from inside `data/`.
+4. Make the data directory writable by the container user (uid 1000):
+   `mkdir -p data && sudo chown 1000:1000 data && chmod 700 data`.
+5. `docker compose up -d --build`, then open `https://<FERRET_DOMAIN>`.
+
+To try it on your own machine, set `FERRET_DOMAIN=localhost`. Caddy issues a certificate from its local CA,
+so your browser will warn about it.
+
+| Variable | Required | Meaning |
+|---|---|---|
+| `FERRET_DOMAIN` | yes | Domain name Caddy serves and gets a certificate for. Compose refuses to start without it, and sets `FERRET_BASE_URL` to `https://<FERRET_DOMAIN>`. |
+
+The other settings go in `.env` too: see [Sign-in email](#sign-in-email) for `FERRET_SMTP_*` and
+[Google sign-in](#google-sign-in) for `FERRET_GOOGLE_*`.
+
+**Backups.** Back up `data/` and `secrets/ferret_master_key` separately: one without the other is useless,
+and together they must not sit in the same place. Caddy's certificates live in the `caddy_data` volume.
+
+**Security.** Every response carries a strict Content-Security-Policy (no inline script or style), HSTS and
+the usual hardening headers. Sign-in link requests are limited to 5 per email address and 20 per IP address
+per hour; uploads are limited to 30 per user per hour, 10 MB each. Caddy refuses request bodies
+over 52 MB (50 MiB of files plus overhead). The master key stays outside `data/`.
+
 ## Development
 
-Requires [uv](https://docs.astral.sh/uv/); it installs Python 3.14 itself (see `.python-version`).
+Requires [uv](https://docs.astral.sh/uv/); it installs Python 3.15 itself (see `.python-version`).
 
 ```
 uv sync                                        # install dependencies (dev included)
@@ -80,7 +111,7 @@ uv run pytest --cov=ferret                     # tests with coverage
 uv run ruff check . && uv run ruff format --check .   # lint and format check
 uv run ruff format .                           # fix formatting
 docker compose build                           # build the container image
-docker compose up                              # run it on port 8000
+docker compose up                              # run it behind Caddy (needs .env)
 ```
 
 ### Master key

@@ -11,6 +11,7 @@ _SECRET_PAIR = re.compile(
 )
 _EMAIL = re.compile(r"[\w.+-]+@[\w-]+(?:\.[\w-]+)+")
 _CARD_NUMBER = re.compile(r"\b(?:\d[ -]?){12,18}\d\b")
+_PDF_LOGGERS = ("pdfminer", "pdfplumber", "pikepdf")
 _LONG_TOKEN = re.compile(r"[A-Za-z0-9_\-+/=]{40,}")
 
 
@@ -37,3 +38,6 @@ def setup_logging(level: str | int = "INFO") -> None:
     handler.setFormatter(RedactingFormatter("%(asctime)s %(levelname)s %(name)s %(message)s"))
     root.addHandler(handler)
     root.setLevel(level)
+    # Their debug output carries the text of the PDF being read, whatever level the app runs at.
+    for name in _PDF_LOGGERS:
+        logging.getLogger(name).setLevel(logging.WARNING)

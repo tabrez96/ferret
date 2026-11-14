@@ -12,6 +12,7 @@ from ferret.config import Settings
 from ferret.keys import load_master_key
 from ferret.logging import setup_logging
 from ferret.web import pages, settings, signin, statement_password, upload
+from ferret.web.headers import security_headers_middleware
 from ferret.web.security import SignedOutError, csrf_cookie_middleware, signed_out_handler
 from ferret.web.templating import STATIC_DIR
 
@@ -41,8 +42,10 @@ def create_app(
     app = FastAPI(
         title="Ferret", version=__version__, docs_url=None, redoc_url=None, lifespan=lifespan
     )
-    app.middleware("http")(csrf_cookie_middleware)
+    # Last added is outermost: the body limit sits inside so its 413 still gets the headers.
     app.add_middleware(upload.UploadBodyLimit)
+    app.middleware("http")(csrf_cookie_middleware)
+    app.middleware("http")(security_headers_middleware)
     app.add_exception_handler(SignedOutError, signed_out_handler)
     app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 

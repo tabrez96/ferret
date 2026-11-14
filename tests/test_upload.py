@@ -159,3 +159,11 @@ def test_oversized_body_refused_before_parsing(client, app, conn, signed_in):
     assert post(client, ("big.pdf", big)).status_code == 413
     assert counts(signed_in[2], conn) == (0, 0, 0)
     assert pending_files(app) == []
+
+
+def test_oversized_body_refusal_carries_security_headers(client, signed_in):
+    big = b"%PDF-" + b"0" * (MAX_BODY_BYTES + 1)
+    response = post(client, ("big.pdf", big))
+    assert response.status_code == 413
+    assert response.headers["Content-Security-Policy"]
+    assert response.headers["Strict-Transport-Security"]
