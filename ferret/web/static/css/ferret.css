@@ -439,6 +439,18 @@ a { color: var(--amber-strong); }
   margin-bottom: 24px;
 }
 
+.notice-ok {
+  background: var(--ok-tint);
+  color: var(--ok);
+  border-radius: var(--radius-btn);
+  padding: 12px 14px;
+  font-size: 14px;
+  line-height: 22px;
+  margin-bottom: 24px;
+}
+
+.delete-list { margin: 0 0 16px; padding-left: 20px; font-size: 14px; line-height: 22px; }
+
 .sent-icon {
   display: flex;
   align-items: center;

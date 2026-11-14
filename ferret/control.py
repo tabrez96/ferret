@@ -128,6 +128,23 @@ def get_user_by_google_sub(conn: sqlite3.Connection, sub: str) -> sqlite3.Row | 
     ).fetchone()
 
 
+def delete_user(conn: sqlite3.Connection, user_id: str) -> None:
+    """Delete every control.db row about a user. Missing user is not an error."""
+    with conn:
+        row = conn.execute("SELECT email FROM users WHERE id = ?", (user_id,)).fetchone()
+        conn.execute(
+            "DELETE FROM jobs WHERE user_id = ?"
+            " AND NOT (kind = 'delete_account' AND status = 'running')",
+            (user_id,),
+        )
+        # Upload buckets are `upload:<user_id>`; user ids are hex, so they hold no LIKE wildcards.
+        conn.execute("DELETE FROM rate_events WHERE bucket LIKE ?", (f"%:{user_id}",))
+        if row is not None:
+            conn.execute("DELETE FROM login_links WHERE email = ?", (row["email"],))
+            # sessions and mcp_tokens go by ON DELETE CASCADE.
+            conn.execute("DELETE FROM users WHERE id = ?", (user_id,))
+
+
 def link_google_sub(conn: sqlite3.Connection, user_id: str, sub: str) -> bool:
     """Link a Google account to a user. False when it is linked to a different Google account."""
     try:

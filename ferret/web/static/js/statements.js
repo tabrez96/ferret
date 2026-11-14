@@ -16,8 +16,21 @@ function openDialog() {
   // A server-rendered [open] dialog is not modal yet: reopen it as a modal.
   if (dialog.open && !dialog.matches(":modal")) dialog.removeAttribute("open");
   if (!dialog.open) dialog.showModal();
-  dialog.querySelector("input[name=password]").focus();
+  const input = dialog.querySelector("input:not([type=hidden])");
+  if (input) input.focus();
+  syncConfirm(dialog);
 }
+
+function syncConfirm(root) {
+  const input = root.querySelector("[data-confirm-word]");
+  const submit = root.querySelector("[data-confirm-submit]");
+  if (input && submit) submit.disabled = input.value.trim() !== input.dataset.confirmWord;
+}
+
+document.addEventListener("input", (event) => {
+  const dialog = event.target.closest("dialog");
+  if (dialog) syncConfirm(dialog);
+});
 
 document.addEventListener("htmx:after:settle", openDialog);
 document.addEventListener("DOMContentLoaded", openDialog);

@@ -1,14 +1,28 @@
 """S05 Settings: the page, and replacing a saved statement password."""
 
+import sqlite3
+
 from fastapi import APIRouter, Depends, Form, Request, Response
 from fastapi.responses import HTMLResponse, RedirectResponse
 
-from ferret.auth.sessions import SessionUser
+from ferret import jobs
+from ferret.auth.sessions import SessionUser, end_all_sessions
 from ferret.passwords import load_password_rows, password_label, replace_password
-from ferret.web.security import now, require_user, user_db, user_dek, verify_csrf
+from ferret.web.security import (
+    SESSION_COOKIE,
+    clear_cookie,
+    control_conn,
+    now,
+    require_user,
+    user_db,
+    user_dek,
+    verify_csrf,
+)
 from ferret.web.templating import templates
 
 router = APIRouter()
+
+CONFIRM_WORD = "DELETE"
 
 
 def _back(request: Request) -> Response:
@@ -83,3 +97,43 @@ def replace(
         return _dialog(request, user, db, "password_replace.html", context)
     replace_password(db, dek, password_id, password, now=now(request))
     return _back(request)
+
+
+def _account_counts(db) -> dict:
+    return {
+        "statements": db.execute("SELECT count(*) FROM statements").fetchone()[0],
+        "transactions": db.execute("SELECT count(*) FROM transactions").fetchone()[0],
+        "passwords": db.execute("SELECT count(*) FROM statement_passwords").fetchone()[0],
+    }
+
+
+@router.get("/settings/account/delete", response_class=HTMLResponse)
+def delete_dialog(request: Request, user: SessionUser = Depends(require_user), db=Depends(user_db)):
+    context = {"counts": _account_counts(db), "error": False}
+    return _dialog(request, user, db, "delete_account.html", context)
+
+
+@router.post(
+    "/settings/account/delete",
+    response_class=HTMLResponse,
+    dependencies=[Depends(verify_csrf)],
+)
+def delete_account(
+    request: Request,
+    confirm: str = Form(""),
+    user: SessionUser = Depends(require_user),
+    db=Depends(user_db),
+    conn: sqlite3.Connection = Depends(control_conn),
+):
+    if confirm.strip() != CONFIRM_WORD:
+        context = {"counts": _account_counts(db), "error": True}
+        return _dialog(request, user, db, "delete_account.html", context)
+    end_all_sessions(conn, user.user_id)
+    jobs.enqueue(conn, "delete_account", user_id=user.user_id, now=now(request))
+    target = "/signin?deleted=1"
+    if request.headers.get("hx-request"):
+        response = Response(status_code=204, headers={"HX-Redirect": target})
+    else:
+        response = RedirectResponse(target, status_code=303)
+    clear_cookie(response, SESSION_COOKIE)
+    return response
