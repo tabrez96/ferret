@@ -223,18 +223,56 @@ def transactions(
         f"WHERE {where} ORDER BY t.posted_on DESC, t.id DESC LIMIT ? OFFSET ?",
         [*params, limit, offset],
     ).fetchall()
-    return [
-        TxRow(
-            r["id"],
-            r["posted_on"],
-            r["merchant"],
-            card_label(r["bank"], r["nickname"], r["last4"]),
-            r["currency"],
-            -r["amount_minor"] if r["is_credit"] else r["amount_minor"],
-            bool(r["is_credit"]),
-        )
-        for r in rows
-    ]
+    return [_tx_row(r) for r in rows]
+
+
+def search_transactions(
+    user_db,
+    query: str = "",
+    date_from: str | None = None,
+    date_to: str | None = None,
+    card_id: int | None = None,
+    limit: int = 50,
+) -> list[TxRow]:
+    where, params = "1 = 1", []
+    for bound, op in ((date_from, ">="), (date_to, "<=")):
+        if bound is not None:
+            try:
+                date.fromisoformat(bound)
+            except ValueError:
+                raise ValueError(f"bad date {bound!r}") from None
+            where += f" AND t.posted_on {op} ?"
+            params.append(bound)
+    if card_id is not None:
+        where += " AND t.card_id = ?"
+        params.append(card_id)
+    query = query.strip()
+    if query:
+        clauses = ["t.merchant LIKE ? ESCAPE '\\'"]
+        params.append(_like(query))
+        for currency, minor in _amount_matches(query):
+            clauses.append("(t.currency = ? AND t.amount_minor = ?)")
+            params += [currency, minor]
+        where += " AND (" + " OR ".join(clauses) + ")"
+    rows = user_db.execute(
+        "SELECT t.id, t.posted_on, t.merchant, t.currency, t.amount_minor, t.is_credit, "
+        f"c.bank, c.nickname, c.last4 {FROM_RECONCILED} JOIN cards c ON c.id = t.card_id "
+        f"WHERE {where} ORDER BY t.posted_on DESC, t.id DESC LIMIT ?",
+        [*params, limit],
+    ).fetchall()
+    return [_tx_row(r) for r in rows]
+
+
+def _tx_row(r) -> TxRow:
+    return TxRow(
+        r["id"],
+        r["posted_on"],
+        r["merchant"],
+        card_label(r["bank"], r["nickname"], r["last4"]),
+        r["currency"],
+        -r["amount_minor"] if r["is_credit"] else r["amount_minor"],
+        bool(r["is_credit"]),
+    )
 
 
 def months_with_data(user_db) -> list[str]:
