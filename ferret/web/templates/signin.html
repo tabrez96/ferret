@@ -34,7 +34,9 @@
     {% if state == "expired" %}
     <div class="notice notice-danger" role="alert"><strong>That sign-in link has expired.</strong><br>Links work once, for 15 minutes. Enter your email for a fresh one.</div>
     {% endif %}
-    {% if notice == "google_failed" %}
+    {% if notice == "account_deleted" %}
+    <div class="notice notice-ok" role="status">Your account and all its data were deleted.</div>
+    {% elif notice == "google_failed" %}
     <div class="notice notice-danger" role="alert"><strong>We couldn't sign you in with Google.</strong><br>Try again, or use an email link instead.</div>
     {% elif notice == "google_unverified" %}
     <div class="notice notice-danger" role="alert"><strong>Google hasn't confirmed this email address.</strong><br>Confirm it with Google, or use an email link instead.</div>

@@ -1,6 +1,7 @@
-"""Background worker: reads statements, polls Gmail and sweeps expired pending files."""
+"""Background worker: reads statements, polls Gmail, sweeps pending files, deletes accounts."""
 
 import logging
+import shutil
 import sqlite3
 import time
 from collections.abc import Callable, Sequence
@@ -16,7 +17,7 @@ from ferret.logging import setup_logging
 from ferret.parsers import PARSERS, Parser
 from ferret.pipeline import run_statement
 from ferret.sweep import sweep_pending
-from ferret.userdb import open_user_db
+from ferret.userdb import open_user_db, user_db_path
 
 logger = logging.getLogger(__name__)
 
@@ -98,6 +99,17 @@ def _sweep(ctx: WorkerContext, now: int) -> None:
         )
 
 
+def _delete_account(ctx: WorkerContext, job: jobs.Job, now: int) -> None:
+    # Idempotent: a retried job finds some or all of this already gone.
+    db_path = user_db_path(ctx.users_dir, job.user_id)  # validates the id
+    for path in (db_path, Path(f"{db_path}-wal"), Path(f"{db_path}-shm")):
+        path.unlink(missing_ok=True)
+    pending = ctx.pending_dir / job.user_id
+    if pending.exists():
+        shutil.rmtree(pending)
+    control.delete_user(ctx.control, job.user_id)
+
+
 def run_once(ctx: WorkerContext) -> bool:
     """Run at most one job. Returns True if a job was claimed."""
     now = ctx.clock()
@@ -112,6 +124,10 @@ def run_once(ctx: WorkerContext) -> bool:
             _gmail_poll(ctx, job, now)
         elif job.kind == "sweep_pending":
             _sweep(ctx, now)
+        elif job.kind == "delete_account":
+            _delete_account(ctx, job, now)
+            jobs.delete(ctx.control, job.id)
+            return True
         else:
             logger.warning("job %d: no handler for %s", job.id, job.kind)
             jobs.fail(ctx.control, job.id)

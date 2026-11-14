@@ -88,6 +88,12 @@ def fail(conn: sqlite3.Connection, job_id: int) -> None:
     _set_status(conn, job_id, "failed")
 
 
+def delete(conn: sqlite3.Connection, job_id: int) -> None:
+    """Remove a finished job row (account deletion leaves no trace)."""
+    with conn:
+        conn.execute("DELETE FROM jobs WHERE id = ?", (job_id,))
+
+
 def requeue_stale(conn: sqlite3.Connection) -> int:
     """Put running jobs back in the queue. Call once at worker start (one worker process)."""
     with conn:
