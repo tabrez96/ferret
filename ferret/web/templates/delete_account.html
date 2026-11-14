@@ -1,0 +1,21 @@
+<dialog class="password-dialog delete-dialog" role="alertdialog" aria-labelledby="del-title" aria-describedby="del-text"{% if dialog %} open{% endif %}>
+  <form class="password-form" method="post" action="/settings/account/delete" hx-post="/settings/account/delete" hx-target="closest dialog" hx-swap="outerHTML">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <h2 id="del-title">Delete your Ferret account?</h2>
+    <p id="del-text" class="dialog-text">This permanently deletes, right now:</p>
+    <ul class="delete-list">
+      <li>{{ counts.statements }} statement{{ 's' if counts.statements != 1 }} and {{ counts.transactions }} transaction{{ 's' if counts.transactions != 1 }}</li>
+      <li>{{ counts.passwords }} saved statement password{{ 's' if counts.passwords != 1 }}</li>
+      <li>Your Gmail connection and chatbot token</li>
+      <li>Any statement files still waiting to be read</li>
+    </ul>
+    <p class="dialog-text muted">It can't be undone. You can start again later, but statements would need to come in again.</p>
+    <label for="del-confirm">Type DELETE to confirm</label>
+    <input id="del-confirm" name="confirm" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" required data-confirm-word="DELETE"{% if error %} aria-invalid="true" aria-describedby="del-error"{% endif %}>
+    {% if error %}<p id="del-error" class="field-error" role="alert"><span aria-hidden="true">⚠</span> Type DELETE to confirm.</p>{% endif %}
+    <div class="dialog-actions">
+      {% if dialog %}<a class="btn btn-secondary" href="/settings">Keep my account</a>{% else %}<button type="submit" class="btn btn-secondary" formnovalidate formmethod="dialog">Keep my account</button>{% endif %}
+      <button type="submit" class="btn btn-danger" data-confirm-submit>Delete everything</button>
+    </div>
+  </form>
+</dialog>

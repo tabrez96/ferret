@@ -38,12 +38,21 @@ def get_session_user(
     row = conn.execute(
         "SELECT users.id AS user_id, users.email AS email, sessions.method AS method"
         " FROM sessions JOIN users ON users.id = sessions.user_id"
-        " WHERE sessions.id_hash = ? AND sessions.expires_at > ?",
+        " WHERE sessions.id_hash = ? AND sessions.expires_at > ?"
+        " AND NOT EXISTS (SELECT 1 FROM jobs WHERE jobs.kind = 'delete_account'"
+        " AND jobs.user_id = users.id AND jobs.status IN ('queued', 'running'))",
         (hash_token(token), now),
     ).fetchone()
     if row is None:
         return None
     return SessionUser(user_id=row["user_id"], email=row["email"], method=row["method"])
+
+
+def end_all_sessions(conn: sqlite3.Connection, user_id: str) -> None:
+    """Sign a user out everywhere: every browser session and every chatbot token."""
+    with conn:
+        conn.execute("DELETE FROM sessions WHERE user_id = ?", (user_id,))
+        conn.execute("DELETE FROM mcp_tokens WHERE user_id = ?", (user_id,))
 
 
 def delete_session(conn: sqlite3.Connection, token: str | None) -> None:

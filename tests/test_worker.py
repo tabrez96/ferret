@@ -78,9 +78,9 @@ def test_failed_sweep_still_schedules_next_hour(conn, kek, user, clock, monkeypa
     assert worker.run_once(ctx) is False
 
 
-def test_unknown_kind_failed(conn, kek, user, clock):
+def test_delete_account_job_leaves_no_row(conn, kek, user, clock):
     jobs.enqueue(conn, "delete_account", user_id=user.user_id, now=clock())
     ctx = make_ctx(conn, kek, user, clock)
     while worker.run_once(ctx):
         pass
-    assert job_statuses(conn, "delete_account") == ["failed"]
+    assert job_statuses(conn, "delete_account") == []

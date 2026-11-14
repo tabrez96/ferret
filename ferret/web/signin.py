@@ -60,10 +60,12 @@ def render(
 
 
 @router.get("/signin")
-def signin_page(request: Request, user: SessionUser | None = Depends(current_user)) -> Response:
+def signin_page(
+    request: Request, deleted: str = "", user: SessionUser | None = Depends(current_user)
+) -> Response:
     if user is not None:
         return RedirectResponse("/", status_code=303)
-    return render(request, "form")
+    return render(request, "form", notice="account_deleted" if deleted == "1" else None)
 
 
 @router.post("/signin/email", dependencies=[Depends(verify_csrf)])
