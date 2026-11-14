@@ -505,6 +505,25 @@ a { color: var(--amber-strong); }
   cursor: pointer;
 }
 
+.dropzone.is-dragover { border-color: var(--amber-strong); }
+
+.upload-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  color: var(--ink);
+  padding: 16px 20px;
+  margin-bottom: 16px;
+}
+.btn-text {
+  background: none;
+  border: 0;
+  color: var(--amber-strong);
+  padding: 0;
+  height: auto;
+}
+.upload-notice p { margin: 0; flex: 1; }
+
 .dropzone-icon {
   width: 32px;
   height: 32px;

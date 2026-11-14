@@ -16,7 +16,15 @@ def conn(data_dir):
 
 def test_connect_creates_all_tables(conn):
     names = {r[0] for r in conn.execute("SELECT name FROM sqlite_master WHERE type = 'table'")}
-    assert names == {"users", "sessions", "login_links", "mcp_tokens", "jobs", "problem_reports"}
+    assert names == {
+        "users",
+        "sessions",
+        "login_links",
+        "mcp_tokens",
+        "jobs",
+        "problem_reports",
+        "rate_events",
+    }
 
 
 def test_create_user_stores_only_wrapped_dek(conn, kek, data_dir):

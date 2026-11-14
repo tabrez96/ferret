@@ -1,0 +1,41 @@
+{% if not rows %}
+<section class="card empty-state">
+  <h2>No statements yet</h2>
+  <p class="muted">Statements you upload or that arrive in Gmail show up here, with whether they added up.</p>
+</section>
+{% else %}
+<section class="card history" aria-labelledby="history-title">
+  <h2 id="history-title">History</h2>
+  <table class="history-table">
+    <thead>
+      <tr>
+        <th scope="col">Statement</th>
+        <th scope="col">Card</th>
+        <th scope="col">From</th>
+        <th scope="col">Status</th>
+        <th scope="col" class="num">Spent</th>
+        <th scope="col"><span class="visually-hidden">Action</span></th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for row in rows %}
+      <tr>
+        <th scope="row">{{ row.month }}</th>
+        <td>{{ row.card }}</td>
+        <td class="meta">{{ row.source }}</td>
+        <td>
+          <span class="chip chip-{{ row.chip_tone }}">{{ row.chip_label }}</span>
+          {% if row.note %}<div class="row-note">{{ row.note }}</div>{% endif %}
+        </td>
+        <td class="num">{{ row.spent }}</td>
+        <td>
+          {% if row.status == "needs_password" %}
+          <a class="btn btn-primary" hx-get="/statements/{{ row.id }}/password" hx-target="#dialog-root" data-password-opener="{{ row.id }}" href="/statements/{{ row.id }}/password">Enter password</a>
+          {% endif %}
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endif %}
