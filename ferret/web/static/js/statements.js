@@ -19,11 +19,12 @@ function openDialog() {
   dialog.querySelector("input[name=password]").focus();
 }
 
-document.addEventListener("htmx:afterSettle", openDialog);
+document.addEventListener("htmx:after:settle", openDialog);
 document.addEventListener("DOMContentLoaded", openDialog);
 
-document.addEventListener("htmx:beforeRequest", (event) => {
-  if (event.detail.elt.matches("[data-password-opener]")) opener = event.detail.elt;
+document.addEventListener("htmx:before:request", (event) => {
+  const source = event.detail.ctx.sourceElement;
+  if (source.matches("[data-password-opener]")) opener = source;
 });
 
 // "close" doesn't bubble, so listen while it travels down. Esc is the native cancel then close:

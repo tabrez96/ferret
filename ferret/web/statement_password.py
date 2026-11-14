@@ -86,7 +86,7 @@ def submit_password(
             now=now(request),
         )
     except WrongPassword:
-        # 200, not 4xx: htmx doesn't swap error responses.
+        # 200: the re-rendered form is the expected response, not an error.
         statement = load_row(db, statement_id)
         return _dialog(request, user, db, statement, wrong=True, changed=changed)
     except NotWaiting:

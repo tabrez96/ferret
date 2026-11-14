@@ -78,7 +78,7 @@ def replace(
     if card is None:
         return _back(request)
     if password.strip() == "":
-        # 200, not 4xx: htmx doesn't swap error responses.
+        # 200: the re-rendered form is the expected response, not an error.
         context = {"password_id": password_id, "card": card, "error": True}
         return _dialog(request, user, db, "password_replace.html", context)
     replace_password(db, dek, password_id, password, now=now(request))
