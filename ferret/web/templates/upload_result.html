@@ -1,0 +1,9 @@
+<div id="upload-notices" aria-live="polite">
+{% for n in notices %}
+  <div class="notice notice-danger upload-notice" role="alert">
+    <p><strong>{{ n.title }}</strong> {{ n.body }}</p>
+    <button type="button" class="btn btn-text" data-dismiss-notice>Dismiss</button>
+  </div>
+{% endfor %}
+</div>
+<div id="history-root">{% include "statements_history.html" %}</div>

@@ -1,4 +1,4 @@
-"""control.db: accounts, sessions, jobs and wrapped keys. Holds nothing financial."""
+"""control.db: accounts, sessions, jobs, wrapped keys and rate limits. Holds nothing financial."""
 
 import sqlite3
 import uuid
@@ -68,7 +68,12 @@ ALTER TABLE sessions ADD COLUMN method TEXT NOT NULL DEFAULT 'email'
     CHECK (method IN ('email', 'google'));
 """
 
-MIGRATIONS: list[str] = [_V1, _V2]
+_V3 = """
+CREATE TABLE rate_events (bucket TEXT NOT NULL, at INTEGER NOT NULL) STRICT;
+CREATE INDEX rate_events_bucket ON rate_events(bucket, at);
+"""
+
+MIGRATIONS: list[str] = [_V1, _V2, _V3]
 
 
 def connect(path: Path) -> sqlite3.Connection:

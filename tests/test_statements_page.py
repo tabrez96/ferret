@@ -35,6 +35,8 @@ def test_empty_page(client, signed_in):
     )
     assert 'accept=".pdf,application/pdf" multiple' in html
     assert "/static/js/statements.js" in html
+    assert 'data-upload-url="/statements/upload"' in html
+    assert 'id="upload-notices"' in html
 
 
 def test_history_chips_have_words(client, signed_in):
