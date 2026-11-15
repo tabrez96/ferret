@@ -57,8 +57,20 @@ def _gmail_poll(ctx: WorkerContext, job: jobs.Job, now: int) -> None:
     if ctx.gmail_factory is None:
         logger.warning("gmail_poll: Google client is not configured")
         return
-    dek = control.load_dek(ctx.control, ctx.kek, job.user_id)
-    user_db = open_user_db(ctx.users_dir, job.user_id, dek)
+    try:
+        dek = control.load_dek(ctx.control, ctx.kek, job.user_id)
+        user_db = open_user_db(ctx.users_dir, job.user_id, dek)
+    except Exception:
+        # One bad open must not end polling; a deleted account is not polled again.
+        if control.user_exists(ctx.control, job.user_id):
+            jobs.schedule_user_job(
+                ctx.control,
+                "gmail_poll",
+                job.user_id,
+                now=now,
+                run_after=now + POLL_INTERVAL_SECONDS,
+            )
+        raise
     try:
         poll_gmail(
             ctx.control,

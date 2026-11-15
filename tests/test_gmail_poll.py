@@ -1,6 +1,6 @@
 import logging
 
-from ferret import jobs, worker
+from ferret import control, jobs, worker
 from ferret.gmail.client import GmailError
 from ferret.gmail.poll import (
     FIRST_LOOKBACK_SECONDS,
@@ -219,3 +219,23 @@ def test_refresh_token_never_logged(conn, kek, user, clock, caplog):
     assert TOKEN.encode() not in ciphertext
     db_file = user.users_dir / f"{user.user_id}.db"
     assert TOKEN.encode() not in db_file.read_bytes()
+
+
+def test_poll_rescheduled_when_user_db_will_not_open(conn, kek, user, clock, monkeypatch):
+    fake, ctx = setup(conn, kek, user, clock)
+
+    def broken(*args, **kwargs):
+        raise OSError("disk")
+
+    monkeypatch.setattr(worker, "open_user_db", broken)
+    run_poll(conn, ctx, user, clock)
+    assert gmail_polls(conn, "failed") == [clock()]
+    assert gmail_polls(conn, "queued") == [clock() + POLL_INTERVAL_SECONDS]
+
+
+def test_poll_not_rescheduled_for_deleted_user(conn, kek, user, clock):
+    fake, ctx = setup(conn, kek, user, clock)
+    control.delete_user(conn, user.user_id)
+    run_poll(conn, ctx, user, clock)
+    assert gmail_polls(conn, "failed") == [clock()]
+    assert gmail_polls(conn, "queued") == []

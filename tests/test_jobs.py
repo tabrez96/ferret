@@ -68,3 +68,39 @@ def test_schedule_user_job_once_per_user(conn):
     assert jobs.schedule_user_job(conn, "gmail_poll", A, now=1, run_after=10) is True
     assert jobs.schedule_user_job(conn, "gmail_poll", A, now=1, run_after=10) is False
     assert jobs.schedule_user_job(conn, "gmail_poll", B, now=1, run_after=10) is True
+
+
+def queued(conn, kind="gmail_poll", user_id=A):
+    rows = conn.execute(
+        "SELECT run_after FROM jobs WHERE kind = ? AND user_id = ? AND status = 'queued'",
+        (kind, user_id),
+    ).fetchall()
+    return [r["run_after"] for r in rows]
+
+
+def test_run_user_job_now(conn):
+    jobs.run_user_job_now(conn, "gmail_poll", A, now=100)
+    assert queued(conn) == [100]
+    jobs.run_user_job_now(conn, "gmail_poll", A, now=150)
+    assert queued(conn) == [100]
+
+
+def test_run_user_job_now_pulls_forward(conn):
+    jobs.enqueue(conn, "gmail_poll", user_id=A, now=1, run_after=9_000)
+    jobs.enqueue(conn, "gmail_poll", user_id=B, now=1, run_after=9_000)
+    jobs.run_user_job_now(conn, "gmail_poll", A, now=200)
+    assert queued(conn) == [200]
+    assert queued(conn, user_id=B) == [9_000]
+
+
+def test_cancel_user_jobs(conn):
+    running = jobs.enqueue(conn, "gmail_poll", user_id=A, now=1)
+    assert jobs.claim_next(conn, now=2).id == running
+    jobs.enqueue(conn, "gmail_poll", user_id=A, now=1, run_after=500)
+    jobs.enqueue(conn, "parse_statement", user_id=A, now=1, run_after=500)
+    jobs.enqueue(conn, "gmail_poll", user_id=B, now=1, run_after=500)
+    assert jobs.cancel_user_jobs(conn, "gmail_poll", A) == 1
+    assert queued(conn) == []
+    assert queued(conn, "parse_statement") == [500]
+    assert queued(conn, user_id=B) == [500]
+    assert status(conn, running) == "running"

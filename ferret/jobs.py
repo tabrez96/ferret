@@ -122,3 +122,29 @@ def schedule_user_job(
         return False
     enqueue(conn, kind, user_id=user_id, now=now, run_after=run_after)
     return True
+
+
+def run_user_job_now(conn: sqlite3.Connection, kind: str, user_id: str, *, now: int) -> None:
+    """Make a user's job due now: pull a queued one forward, or enqueue one."""
+    with conn:
+        cur = conn.execute(
+            "UPDATE jobs SET run_after = min(run_after, ?)"
+            " WHERE kind = ? AND user_id = ? AND status = 'queued'",
+            (now, kind, user_id),
+        )
+    if cur.rowcount == 0:
+        enqueue(conn, kind, user_id=user_id, now=now)
+
+
+def cancel_user_jobs(conn: sqlite3.Connection, kind: str, user_id: str) -> int:
+    """Delete a user's queued jobs of one kind. A running one finishes.
+
+    A running gmail_poll reschedules itself while the Gmail connection row exists,
+    so delete the connection before cancelling.
+    """
+    with conn:
+        cur = conn.execute(
+            "DELETE FROM jobs WHERE kind = ? AND user_id = ? AND status = 'queued'",
+            (kind, user_id),
+        )
+    return cur.rowcount
