@@ -93,20 +93,19 @@
     {% endfor %}
   </section>
   <section class="card panel tx" aria-labelledby="tx-title">
-    <h2 class="panel-title" id="tx-title">Transactions</h2>
-    <table class="history-table tx-table">
-      <thead><tr><th scope="col">Date</th><th scope="col">Merchant</th><th scope="col">Card</th><th scope="col" class="num">Amount</th></tr></thead>
-      <tbody>
-      {% for r in rows %}
-        <tr>
-          <td class="meta">{{ r.posted_on|short_day }}</td>
-          <td>{{ r.merchant }}{% if r.is_credit %} <span class="chip chip-ok">Refund</span>{% endif %}</td>
-          <td class="meta">{{ r.card }}</td>
-          <td class="num{{ ' amount-refund' if r.is_credit }}">{{ r.amount_minor|money(r.currency) }}</td>
-        </tr>
-      {% endfor %}
-      </tbody>
-    </table>
+    <div class="tx-head">
+      <h2 class="panel-title" id="tx-title">Transactions</h2>
+      <form class="tx-search" role="search" method="get" action="/"
+        hx-get="/transactions" hx-target="#tx-body" hx-swap="innerHTML"
+        hx-trigger="submit, input delay:300ms" hx-sync="this:replace" hx-indicator="closest .tx">
+        <input type="hidden" name="month" value="{{ month }}">
+        <input type="hidden" name="card" value="{{ card_id if card_id is not none else '' }}">
+        <label class="visually-hidden" for="tx-q">Search transactions</label>
+        <input id="tx-q" type="search" name="q" value="{{ q }}" placeholder="Search merchant or amount" autocomplete="off">
+      </form>
+    </div>
+    <div id="tx-body" class="tx-body">{% include "spending_tx.html" %}</div>
+    <div class="tx-skeleton" aria-hidden="true">{% for _ in range(6) %}<span class="skeleton-row"></span>{% endfor %}</div>
   </section>
 </div>
 {% endif %}

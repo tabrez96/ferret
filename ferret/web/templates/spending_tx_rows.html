@@ -1,0 +1,16 @@
+{% for r in rows %}
+<tr>
+  <td class="meta">{{ r.posted_on|short_day }}</td>
+  <td>{{ r.merchant }}{% if r.is_credit %} <span class="chip chip-ok">Refund</span>{% endif %}</td>
+  <td class="meta">{{ r.card }}</td>
+  <td class="num{{ ' amount-refund' if r.is_credit }}">{{ r.amount_minor|money(r.currency) }}</td>
+</tr>
+{% endfor %}
+{% if more %}
+<tr class="tx-more-row"><td colspan="4">
+  <button type="button" class="btn btn-secondary"
+    hx-get="/transactions/rows?{{ {'month': month, 'card': card_id if card_id is not none else '', 'q': q, 'offset': next_offset}|urlencode }}"
+    hx-target="closest tr" hx-swap="outerHTML" hx-indicator="closest tr">Show more</button>
+  <span class="skeleton-row" aria-hidden="true"></span><span class="skeleton-row" aria-hidden="true"></span><span class="skeleton-row" aria-hidden="true"></span>
+</td></tr>
+{% endif %}
