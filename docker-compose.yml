@@ -40,6 +40,8 @@ services:
     environment:
       FERRET_DATA_DIR: /app/data
       FERRET_MASTER_KEY_FILE: /run/secrets/ferret_master_key
+      FERRET_GOOGLE_CLIENT_ID: ${FERRET_GOOGLE_CLIENT_ID:-}
+      FERRET_GOOGLE_CLIENT_SECRET: ${FERRET_GOOGLE_CLIENT_SECRET:-}
     secrets:
       - ferret_master_key
     restart: unless-stopped
