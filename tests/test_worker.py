@@ -1,4 +1,6 @@
 from ferret import jobs, worker
+from ferret.config import Settings
+from ferret.gmail.client import GoogleGmail
 from ferret.pipeline import submit_statement
 from tests.fixtures.fake_parser import FakeParser, statement
 from tests.fixtures.pdfs import make_pdf
@@ -84,3 +86,19 @@ def test_delete_account_job_leaves_no_row(conn, kek, user, clock):
     while worker.run_once(ctx):
         pass
     assert job_statuses(conn, "delete_account") == []
+
+
+def test_build_context_with_google_settings(conn, kek, tmp_path):
+    settings = Settings(
+        data_dir=tmp_path,
+        master_key_file=None,
+        google_client_id="id",
+        google_client_secret="secret",
+    )
+    ctx = worker.build_context(settings, conn, kek)
+    assert isinstance(ctx.gmail_factory("t"), GoogleGmail)
+
+
+def test_build_context_without_google_settings(conn, kek, tmp_path):
+    ctx = worker.build_context(Settings(data_dir=tmp_path, master_key_file=None), conn, kek)
+    assert ctx.gmail_factory is None

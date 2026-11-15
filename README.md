@@ -158,6 +158,8 @@ Ferret asks Google only for `openid email`; Gmail access is requested separately
 | `FERRET_GOOGLE_CLIENT_SECRET` | (unset) | Client secret of the OAuth client. |
 
 Without both, the button shows "Google sign-in isn't set up here." and the email link still works.
+The same client ID and secret also enable Gmail polling in the worker. Polling also needs the Gmail API
+enabled in the same Google Cloud project; without it every Gmail request fails with a 403 `accessNotConfigured`.
 
 Sign-in and session cookies are `Secure`. Browsers accept them on `http://127.0.0.1` and `localhost`;
 any other address needs HTTPS (Caddy provides it in production).

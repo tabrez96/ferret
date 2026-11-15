@@ -10,7 +10,7 @@ from pathlib import Path
 
 from ferret import control, jobs
 from ferret.config import Settings
-from ferret.gmail.client import GmailFactory
+from ferret.gmail.client import GmailFactory, gmail_factory_from_settings
 from ferret.gmail.poll import POLL_INTERVAL_SECONDS, gmail_connected, poll_gmail
 from ferret.keys import load_master_key
 from ferret.logging import setup_logging
@@ -141,19 +141,26 @@ def run_once(ctx: WorkerContext) -> bool:
     return True
 
 
+def build_context(settings: Settings, conn: sqlite3.Connection, kek: bytes) -> WorkerContext:
+    return WorkerContext(
+        control=conn,
+        kek=kek,
+        users_dir=settings.users_dir,
+        pending_dir=settings.pending_dir,
+        clock=lambda: int(time.time()),
+        gmail_factory=gmail_factory_from_settings(settings),
+    )
+
+
 def main() -> None:
     settings = Settings.from_env()
     setup_logging()
     kek = load_master_key(settings.master_key_file, settings.data_dir)
     conn = control.connect(settings.control_db_path)
     jobs.requeue_stale(conn)
-    ctx = WorkerContext(
-        control=conn,
-        kek=kek,
-        users_dir=settings.users_dir,
-        pending_dir=settings.pending_dir,
-        clock=lambda: int(time.time()),
-    )
+    ctx = build_context(settings, conn, kek)
+    if ctx.gmail_factory is None:
+        logger.info("worker: Google is not configured, Gmail polling is off")
     while True:
         if not run_once(ctx):
             time.sleep(IDLE_SLEEP_SECONDS)
