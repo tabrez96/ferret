@@ -1,0 +1,8 @@
+{% if rows %}
+<table class="history-table tx-table">
+  <thead><tr><th scope="col">Date</th><th scope="col">Merchant</th><th scope="col">Card</th><th scope="col" class="num">Amount</th></tr></thead>
+  <tbody>{% include "spending_tx_rows.html" %}</tbody>
+</table>
+{% elif q %}
+<p class="tx-empty" role="status">No transactions match "{{ q }}" in {{ month_name }}.</p>
+{% endif %}

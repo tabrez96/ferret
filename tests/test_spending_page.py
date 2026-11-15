@@ -157,3 +157,92 @@ def test_first_50_rows(client, signed_in):  # noqa: F811
     signed_in.commit()
     body = client.get("/").text.split("<tbody>")[1]
     assert body.count("<tr>") == 50
+
+
+def seed_october(db, n, name="Shop {}"):
+    card, st = seed(db)
+    for i in range(n):
+        add_tx(db, st, card, f"2026-10-{i % 28 + 1:02d}", name.format(i), 100 + i)
+    db.commit()
+    return card
+
+
+def test_parse_offset():
+    assert vm.parse_offset("50") == 50
+    for bad in ("", "x", "-5", "9" * 20, "²"):
+        assert vm.parse_offset(bad) == 0
+
+
+def test_tx_page_more_flag(signed_in):  # noqa: F811
+    seed_october(signed_in, 51)
+    page = vm.tx_page(signed_in, "2026-10", None, "", 0)
+    assert page["more"] and len(page["rows"]) == 50 and page["next_offset"] == 50
+    assert not vm.tx_page(signed_in, "2026-10", None, "", 1)["more"]
+
+
+def test_show_more_appends_and_disappears(client, signed_in):  # noqa: F811
+    seed_october(signed_in, 120)
+    body = client.get("/").text.split("<tbody>")[1]
+    assert body.count("<tr>") == 50 and "offset=50" in body
+    second = client.get("/transactions/rows?month=2026-10&offset=50").text
+    assert second.count("<tr>") == 50
+    assert 'class="tx-more-row"' in second and "offset=100" in second
+    last = client.get("/transactions/rows?month=2026-10&offset=100").text
+    assert last.count("<tr>") == 20 and "Show more" not in last
+
+
+def test_exactly_50_rows_no_show_more(client, signed_in):  # noqa: F811
+    seed_october(signed_in, 50)
+    assert "Show more" not in client.get("/").text
+
+
+def test_search_by_merchant_and_amount(client, signed_in):  # noqa: F811
+    card, st = seed(signed_in)
+    add_tx(signed_in, st, card, "2026-10-10", "Noon", 41275)
+    add_tx(signed_in, st, card, "2026-10-11", "Spinneys", 5000)
+    signed_in.commit()
+    html = client.get("/transactions?month=2026-10&q=noon").text
+    assert "Noon" in html and "Spinneys" not in html
+    html = client.get("/transactions?month=2026-10&q=412.75").text
+    assert "Noon" in html and "Spinneys" not in html
+    full = client.get("/?month=2026-10&q=noon").text
+    assert 'value="noon"' in full and "Spinneys" not in full.split("<tbody>")[1]
+
+
+def test_search_no_results(client, signed_in):  # noqa: F811
+    seed_october(signed_in, 3)
+    html = client.get("/transactions?month=2026-10&q=xyz").text
+    assert 'No transactions match "xyz" in October.' in html
+    assert "<table" not in html
+    assert client.get("/transactions?month=2026-10").text.strip() != ""
+
+
+def test_search_escapes_query(client, signed_in):  # noqa: F811
+    seed_october(signed_in, 3)
+    html = client.get("/transactions", params={"month": "2026-10", "q": "<b>x"}).text
+    assert "&lt;b&gt;x" in html and "<b>x" not in html
+
+
+def test_search_keeps_query_in_show_more(client, signed_in):  # noqa: F811
+    seed_october(signed_in, 60)
+    assert "q=shop" in client.get("/transactions?month=2026-10&q=shop").text
+
+
+def test_page_has_search_and_skeleton(client, signed_in):  # noqa: F811
+    seed_october(signed_in, 3)
+    html = client.get("/").text
+    assert 'placeholder="Search merchant or amount"' in html
+    assert 'role="search"' in html and 'class="tx-skeleton"' in html
+    assert "spinner" not in html
+
+
+def test_partials_require_sign_in(client):
+    assert client.get("/transactions").status_code == 303
+    assert client.get("/transactions/rows").status_code == 303
+
+
+def test_partials_signed_out_htmx_gets_hx_redirect(client):
+    for path in ("/transactions", "/transactions/rows"):
+        r = client.get(path, headers={"HX-Request": "true"})
+        assert r.status_code == 204
+        assert r.headers["HX-Redirect"] == "/signin"

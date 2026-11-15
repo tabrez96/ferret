@@ -794,7 +794,16 @@ a.chip { text-decoration: underline; }
 .bar-track { fill: var(--amber-track); }
 .bar-fill { fill: var(--amber); }
 .tx { padding: 24px 12px 12px; }
-.tx .panel-title { padding: 0 12px; }
+.tx-head { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 0 12px; margin-bottom: 12px; }
+.tx-head .panel-title { margin: 0; }
+.tx-search input { width: 260px; height: 40px; padding: 0 12px; border-radius: var(--radius-btn); border: 1px solid var(--field-line); background: var(--surface); color: var(--ink); font: 15px var(--font); }
+.tx-search input::placeholder { color: var(--ink-muted); }
+.tx-empty { margin: 0; padding: 32px 12px; text-align: center; color: var(--ink-muted); }
+.history-table .tx-more-row td { text-align: center; padding-top: 16px; border-bottom: 0; }
+.skeleton-row { display: block; height: 16px; margin: 14px 12px; border-radius: 4px; background: var(--neutral-tint); }
+.tx-skeleton, .tx-more-row .skeleton-row { display: none; }
+.tx.htmx-request .tx-skeleton, .tx-more-row.htmx-request .skeleton-row { display: block; }
+.tx.htmx-request .tx-body, .tx-more-row.htmx-request .btn { display: none; }
 .amount-refund { color: var(--ok); }
 .tx-table .chip { margin-left: 8px; }
 .first-run { max-width: 760px; margin: 40px auto 0; padding: 48px 40px; }
@@ -807,5 +816,7 @@ a.chip { text-decoration: underline; }
   .spending-head { flex-wrap: wrap; }
   .spending-top, .spending-bottom { grid-template-columns: 1fr; }
   .tx { overflow-x: auto; }
+  .tx-head { flex-wrap: wrap; }
+  .tx-search, .tx-search input { width: 100%; }
   .first-run-options { flex-direction: column; }
 }

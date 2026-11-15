@@ -101,6 +101,10 @@ def user_db(
 
 
 def signed_out_handler(request: Request, exc: SignedOutError) -> Response:
-    response = RedirectResponse("/signin", status_code=303)
+    # htmx follows a 303 and swaps the sign-in page into the fragment; HX-Redirect navigates.
+    if request.headers.get("hx-request"):
+        response = Response(status_code=204, headers={"HX-Redirect": "/signin"})
+    else:
+        response = RedirectResponse("/signin", status_code=303)
     clear_cookie(response, SESSION_COOKIE)
     return response

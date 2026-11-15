@@ -51,6 +51,14 @@ def parse_card(raw: str) -> int | None:
     return int(raw) if raw.isdecimal() and len(raw) <= 9 else None
 
 
+PAGE_SIZE = 50
+
+
+def parse_offset(raw: str) -> int:
+    # Same idea as parse_card: anything odd means "from the top".
+    return int(raw) if raw.isdecimal() and len(raw) <= 6 else 0
+
+
 def resolve_month(raw: str | None, available: list[str], today: date) -> str:
     if raw is not None:
         try:
@@ -126,7 +134,27 @@ def card_options(user_db) -> list[tuple[int, str]]:
     return [(r["id"], card_label(r["bank"], r["nickname"], r["last4"])) for r in rows]
 
 
-def build_page(user_db, raw_month: str | None, raw_card: str, today: date) -> dict:
+def resolve_filters(
+    user_db, raw_month: str | None, raw_card: str, today: date
+) -> tuple[str, int | None]:
+    return resolve_month(raw_month, sp.months_with_data(user_db), today), parse_card(raw_card)
+
+
+def tx_page(user_db, month: str, card_id: int | None, q: str, offset: int) -> dict:
+    q = q.strip()[:100]
+    found = sp.transactions(user_db, month, card_id, q, limit=PAGE_SIZE + 1, offset=offset)
+    return {
+        "rows": found[:PAGE_SIZE],
+        "more": len(found) > PAGE_SIZE,
+        "next_offset": offset + PAGE_SIZE,
+        "q": q,
+        "month": month,
+        "card_id": card_id,
+        "month_name": month_name(month),
+    }
+
+
+def build_page(user_db, raw_month: str | None, raw_card: str, today: date, q: str = "") -> dict:
     if not sp.has_statements(user_db):
         return {"state": "first_run"}
     available = sp.months_with_data(user_db)
@@ -143,6 +171,7 @@ def build_page(user_db, raw_month: str | None, raw_card: str, today: date) -> di
         "source_line": source_line(sp.source_summary(user_db)),
         "counts": sp.statement_counts(user_db, month),
         "totals": [(t, comparison(t, previous_name)) for t in totals],
+        "q": q.strip()[:100],
     }
     if not totals:
         return {**ctx, "state": "no_statement"}
@@ -154,5 +183,5 @@ def build_page(user_db, raw_month: str | None, raw_card: str, today: date) -> di
             chart(c, s, month) for c, s in sp.monthly_series(user_db, month, card_id).items()
         ],
         "merchants": merchant_rows(sp.top_merchants(user_db, month, card_id)),
-        "rows": sp.transactions(user_db, month, card_id),
+        **tx_page(user_db, month, card_id, q, 0),
     }
