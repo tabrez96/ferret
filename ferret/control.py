@@ -116,6 +116,10 @@ def load_dek(conn: sqlite3.Connection, kek: bytes, user_id: str) -> bytes:
     return unwrap_dek(kek, row["wrapped_dek"], user_id)
 
 
+def user_exists(conn: sqlite3.Connection, user_id: str) -> bool:
+    return conn.execute("SELECT 1 FROM users WHERE id = ?", (user_id,)).fetchone() is not None
+
+
 def get_user_by_email(conn: sqlite3.Connection, email: str) -> sqlite3.Row | None:
     return conn.execute(
         "SELECT id, email, google_sub FROM users WHERE email = ?", (email,)
