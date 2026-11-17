@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
+from starlette.routing import Route
 
 from ferret import __version__, control
 from ferret.auth.google import GoogleOAuth, google_from_settings
@@ -11,6 +12,7 @@ from ferret.auth.mail import Mailer, mailer_from_settings
 from ferret.config import Settings
 from ferret.keys import load_master_key
 from ferret.logging import setup_logging
+from ferret.mcp.server import MCP_PATH, McpAuthApp, build_server
 from ferret.web import pages, settings, signin, statement_password, upload
 from ferret.web.headers import security_headers_middleware
 from ferret.web.security import SignedOutError, csrf_cookie_middleware, signed_out_handler
@@ -37,7 +39,11 @@ def create_app(
         app.state.google = google or google_from_settings(settings)
         settings.users_dir.mkdir(parents=True, exist_ok=True, mode=0o700)
         control.connect(settings.control_db_path).close()
-        yield
+        # Built per lifespan: a session manager runs once, and a test may start one app twice.
+        mcp_server = build_server()
+        app.state.mcp_app = mcp_server.streamable_http_app()
+        async with mcp_server.session_manager.run():
+            yield
 
     app = FastAPI(
         title="Ferret", version=__version__, docs_url=None, redoc_url=None, lifespan=lifespan
@@ -58,6 +64,9 @@ def create_app(
     app.include_router(statement_password.router)
     app.include_router(upload.router)
     app.include_router(settings.router)
+    # A Route, not a Mount: a Mount would redirect POST /mcp to /mcp/.
+    # The MCP app routes MCP_PATH itself.
+    app.router.routes.append(Route(MCP_PATH, McpAuthApp(app), name="mcp"))
     return app
 
 
