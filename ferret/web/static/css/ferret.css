@@ -811,6 +811,10 @@ a.chip { text-decoration: underline; }
 .first-run-options { display: flex; gap: 16px; justify-content: center; margin: 24px 0; }
 .first-run-option { padding: 20px; text-align: left; flex: 1; max-width: 330px; }
 .first-run-option h3 { font-size: 17px; font-weight: 600; margin: 0 0 4px; }
+.first-run-lead { max-width: 500px; margin: 0 auto; }
+.first-run-option-head { display: flex; align-items: center; gap: 8px; margin: 0 0 4px; }
+.first-run-option-head h3 { margin: 0; }
+.btn-gmail svg { width: 18px; height: 18px; }
 
 @media (max-width: 767px) {
   .spending-head { flex-wrap: wrap; }

@@ -49,6 +49,7 @@ def test_signin_page_renders(client):
     r = client.get("/signin")
     assert r.status_code == 200
     assert "Sign in to Ferret" in r.text
+    assert 'viewBox="0 0 48 48"' in r.text
 
 
 def test_request_link_sends_email_and_shows_sent_state(client, mailer):

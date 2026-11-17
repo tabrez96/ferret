@@ -77,8 +77,13 @@ def test_merchant_widths():
 def test_first_run_page(client, signed_in):  # noqa: F811
     html = client.get("/").text
     assert "Let's find your spending" in html
+    assert 'href="/gmail/connect"' in html and "Connect Gmail" in html
+    assert 'chip chip-neutral">Recommended' in html
+    assert "Read-only." in html
+    assert "new statements come in by themselves" in html
+    assert 'viewBox="0 0 48 48"' in html
     assert 'href="/statements#upload"' in html and "Choose a PDF" in html
-    assert "Connect Gmail" not in html
+    assert html.index('href="/gmail/connect"') < html.index("Upload a statement")
     assert "<select" not in html
 
 

@@ -32,8 +32,13 @@
 <section class="card empty-state first-run">
   <img src="/static/img/mark.svg" alt="" width="80" height="80">
   <h2>Let's find your spending</h2>
-  <p class="muted">Give Ferret your card statements and it does the rest.</p>
+  <p class="muted first-run-lead">Give Ferret your card statements and it does the rest. Connect Gmail once and new statements come in by themselves each month.</p>
   <div class="first-run-options">
+    <div class="card first-run-option">
+      <div class="first-run-option-head"><h3>Connect Gmail</h3><span class="chip chip-neutral">Recommended</span></div>
+      <p class="muted">Ferret looks only for statement emails from supported banks. Read-only.</p>
+      <a class="btn btn-primary btn-gmail" href="/gmail/connect">{% include "google_g.html" %}Connect Gmail</a>
+    </div>
     <div class="card first-run-option">
       <h3>Upload a statement</h3>
       <p class="muted">A PDF from your bank. Locked files are fine; you'll enter the password once.</p>
