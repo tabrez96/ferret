@@ -126,14 +126,23 @@ def schedule_user_job(
 
 def run_user_job_now(conn: sqlite3.Connection, kind: str, user_id: str, *, now: int) -> None:
     """Make a user's job due now: pull a queued one forward, or enqueue one."""
-    with conn:
+    conn.execute("BEGIN IMMEDIATE")
+    try:
         cur = conn.execute(
             "UPDATE jobs SET run_after = min(run_after, ?)"
             " WHERE kind = ? AND user_id = ? AND status = 'queued'",
             (now, kind, user_id),
         )
-    if cur.rowcount == 0:
-        enqueue(conn, kind, user_id=user_id, now=now)
+        if cur.rowcount == 0:
+            conn.execute(
+                "INSERT INTO jobs (user_id, kind, payload_json, run_after, created_at)"
+                " VALUES (?, ?, ?, ?, ?)",
+                (user_id, kind, "{}", now, now),
+            )
+        conn.commit()
+    except BaseException:
+        conn.rollback()
+        raise
 
 
 def cancel_user_jobs(conn: sqlite3.Connection, kind: str, user_id: str) -> int:
