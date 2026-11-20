@@ -1,0 +1,17 @@
+# Betterleaks: the default rules, minus values that are fake on purpose
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Test fixtures and examples hold made-up passwords"
+paths = [
+  '''(^|/)tests/''',
+  '''(^|/)\.env\.example$''',
+]
+
+[[allowlists]]
+description = "Names of encrypted fields, not their values"
+regexTarget = "line"
+regexes = [
+  '''FIELD_[A-Z_]+ = "[a-z_]+"''',
+]

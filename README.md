@@ -110,9 +110,13 @@ uv run pytest                                  # tests
 uv run pytest --cov=ferret                     # tests with coverage
 uv run ruff check . && uv run ruff format --check .   # lint and format check
 uv run ruff format .                           # fix formatting
+betterleaks git --redact --verbose --config .betterleaks.toml --log-opts="--full-history --all --diff-filter=tuxdb --diff-merges=first-parent" .  # secret scan of full git history incl. merge patches (CI pins the version in .github/workflows/ci.yml)
 docker compose build                           # build the container image
 docker compose up                              # run it behind Caddy (needs .env)
 ```
+
+Install betterleaks from its GitHub releases page, using the version pinned in `.github/workflows/ci.yml`.
+Fake values in tests and examples are allowlisted in `.betterleaks.toml`; a real secret anywhere else still fails the build.
 
 ### Master key
 
