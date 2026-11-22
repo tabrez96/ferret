@@ -8,7 +8,7 @@ Status: **draft** (UX not approved yet), **approved**, **building** (a ticket fo
 
 | ID | Screen | Status | Purpose | Tickets | Updated |
 | --- | --- | --- | --- | --- | --- |
-| S01 | [Sign in](screens/S01-sign-in/screen.html) (+3 states) · [spec](screens/S01-sign-in/spec.md) | built | Sign in or create an account without a Ferret password | T-59, T-60, T-68 | 2026-11-08 |
+| S01 | [Sign in](screens/S01-sign-in/screen.html) (+3 states) · [spec](screens/S01-sign-in/spec.md) | building | Sign in or create an account without a Ferret password | T-59, T-60, T-68, T-206 | 2026-11-08 |
 | S02 | [Spending](screens/S02-spending/screen.html) (+2 states) · [spec](screens/S02-spending/spec.md) | built | See what you spent this month, per card, at which merchants, and every transaction | T-66, T-67, T-84, T-85, T-88 | 2026-11-08 |
 | S03 | [Statements](screens/S03-statements/screen.html) (+4 states) · [spec](screens/S03-statements/spec.md) | built | Bring statements in (Gmail or PDF) and see whether each one added up | T-64, T-65, T-66, T-67, T-71, T-82, T-84, T-87 | 2026-11-08 |
 | S04 | [Statement password](screens/S04-statement-password/screen.html) (+2 states) · [spec](screens/S04-statement-password/spec.md) | built | Enter a statement PDF's password once so this card's statements open by themselves from then on | T-65 | 2026-11-08 |
